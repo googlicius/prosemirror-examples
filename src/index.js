@@ -3,72 +3,86 @@ import { EditorView } from 'prosemirror-view';
 import { DOMParser } from "prosemirror-model";
 import { schema } from 'prosemirror-schema-basic';
 import { exampleSetup } from 'prosemirror-example-setup';
+import { toggleMark } from 'prosemirror-commands';
 
-let selectionSizePlugin = new Plugin({
-    view(editorView) { return new SelectionSizeTooltip(editorView) }
-})
+/**
+ * @typedef {Object} Item
+ * @property {HTMLElement} dom
+ * @property {(state: EditorState, dispatch: Function, view: EditorView)} command
+ */
 
-class SelectionSizeTooltip {
+class MenuView {
+    dom = document.createElement("div");
+
     /**
-     * Tooltip element
-     * @type HTMLDivElement
+     * @type Array<Item>
      */
-    tooltip;
+    items;
+
+    /**
+     * @type EditorView
+     */
+    editorView;
 
     /**
      * Constructor
-     * @param {EditorView} view 
+     * @param {Array<Item>} items 
+     * @param {EditorView} editorView 
      */
-    constructor(view) {
-        this.tooltip = document.createElement("div");
-        this.tooltip.className = "tooltip";
-        view.dom.parentNode.appendChild(this.tooltip);
-        this.update(view, null);
+    constructor(items, editorView) {
+        this.dom.className = "menubar";
+        this.items = items;
+        this.editorView = editorView;
+
+        this.items.forEach(({ dom }) => this.dom.appendChild(dom));
+        this.update();
+
+        this.dom.addEventListener("mousedown", e => {
+            e.preventDefault();
+            editorView.focus();
+            items.forEach(({ command, dom }) => {
+                if (dom.contains(e.target)) {
+                    command(editorView.state, editorView.dispatch, editorView);
+                }
+            })
+        })
     }
 
-    /**
-     * Update view
-     * @param {EditorView} view 
-     * @param {EditorState} lastState 
-     */
-    update(view, lastState) {
-        let state = view.state;
-
-        // Don't do anything if the document/selection didn't change
-        if (lastState && lastState.doc.eq(state.doc) && lastState.selection.eq(state.selection)) {
-            return;
-        }
-        
-        // Hide the tooltip if the selection is empty
-        if (state.selection.empty) {
-            this.tooltip.style.display = "none";
-            return;
-        }
-
-        // Otherwise, reposition it and update its content
-        this.tooltip.style.display = "";
-        let { from, to } = state.selection;
-        // These are in screen coordinates
-        let start = view.coordsAtPos(from);
-        let end = view.coordsAtPos(to);
-        // The box in which the tooltip is positioned, to use as base
-        let box = this.tooltip.offsetParent.getBoundingClientRect()
-        // Find a center-ish x position from the selection endpoints (when
-        // crossing lines, end may be more to the left)
-        let left = Math.max((start.left + end.left) / 2, start.left + 3);
-        this.tooltip.style.left = (left - box.left) + 'px';
-        this.tooltip.style.bottom = (box.bottom - start.top) + 'px';
-        this.tooltip.textContent = to - from;
+    update() {
+        this.items.forEach(({command, dom}) => {
+            let active = command(this.editorView.state, null, this.editorView);
+            dom.style.display = active ? "" : "none"
+        })
     }
 
     destroy() {
-        this.tooltip.destroy();
+        this.dom.destroy();
     }
 }
 
-window.view = new EditorView(document.querySelector("#editor"), {
-    state: EditorState.create({
-        doc: DOMParser.fromSchema(schema).parse(document.querySelector("#content")),
-        plugins: exampleSetup({ schema }).concat(selectionSizePlugin)
+// Helper function to create menu icons
+function icon(text, name) {
+    let span = document.createElement("span")
+    span.className = "menuicon " + name
+    span.title = name
+    span.textContent = text
+    return span
+}
+
+/**
+ * 
+ * @param {Array} items 
+ */
+function menuPlugin(items) {
+    return new Plugin({
+        view(editorView) {
+            let menuView = new MenuView(items, editorView);
+            editorView.dom.parentNode.insertBefore(menuView.dom, editorView.dom);
+            return menuView;
+        }
     })
-})
+}
+
+let menu = menuPlugin([
+    { command: toggleMark(schema.marks.strong), dom: icon("B", "strong") }
+])
