@@ -1,153 +1,74 @@
-import { Schema, DOMParser } from 'prosemirror-model';
-import { findWrapping } from 'prosemirror-transform';
-import { EditorState } from 'prosemirror-state';
-import { toggleMark, baseKeymap } from 'prosemirror-commands';
-import { keymap } from 'prosemirror-keymap';
+import { Plugin, EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { undo, redo, history } from 'prosemirror-history';
+import { DOMParser } from "prosemirror-model";
+import { schema } from 'prosemirror-schema-basic';
+import { exampleSetup } from 'prosemirror-example-setup';
 
-const textSchema = new Schema({
-    nodes: {
-        text: {},
-        doc: { content: "text*" }
-    }
+let selectionSizePlugin = new Plugin({
+    view(editorView) { return new SelectionSizeTooltip(editorView) }
 })
 
-const noteSchema = new Schema({
-    nodes: {
-        text: {},
-        note: {
-            content: "text*",
-            toDOM() { return ["note", 0] },
-            parseDOM: [{ tag: "note" }],
-            inline: false
-        },
-        notegroup: {
-            content: "note+",
-            toDOM() { return ["notegroup", 0] },
-            parseDOM: [{ tag: "notegroup" }]
-        },
-        doc: {
-            content: "(note | notegroup)+"
-        }
-    }
-});
+class SelectionSizeTooltip {
+    /**
+     * Tooltip element
+     * @type HTMLDivElement
+     */
+    // tooltip;
 
-const starSchema = new Schema({
-    nodes: {
-        text: {
-            group: "inline"
-        },
-        star: {
-            inline: true,
-            group: "inline",
-            toDOM() { return ["star", "🟊"] },
-            parseDOM: [{ tag: "star" }]
-        },
-        paragraph: {
-            group: "block",
-            content: "inline*",
-            toDOM() { return ["p", 0] },
-            parseDOM: [{ tag: "p" }]
-        },
-        boring_paragraph: {
-            group: "block",
-            content: "text*",
-            marks: "",
-            toDOM() { return ["p", { class: "boring" }, 0] },
-            parseDOM: [{ tag: "p.boring", priority: 60 }]
-        },
-        doc: {
-            content: "block+"
-        }
-    },
-    marks: {
-        shouting: {
-            toDOM() { return ["shouting"] },
-            parseDOM: [{ tag: "shouting" }]
-        },
-        link: {
-            attrs: { href: {} },
-            toDOM(node) { return ["a", { href: node.attrs.href }] },
-            parseDOM: [{ tag: "a", getAttrs(dom) { return { href: dom.href } } }],
-            inclusive: false
-        }
+    /**
+     * Constructor
+     * @param {EditorView} view 
+     */
+    constructor(view) {
+        this.tooltip = document.createElement("div");
+        this.tooltip.className = "tooltip";
+        view.dom.parentNode.appendChild(this.tooltip);
+        this.update(view, null);
     }
-});
 
-/**
- * Make group note
- * @param {EditorState} state
- * @param {*} dispatch 
- */
-function makeGroupNote(state, dispatch) {
-    // Get a range around the selected blocks
-    let range = state.selection.$from.blockRange(state.selection.$to);
-    // See if it is possible to wrap that range in a note group
-    let wrapping = findWrapping(range, noteSchema.nodes.notegroup);
-    // If not, the command doesn't apply
-    if (!wrapping) return false;
-    // Otherwise, dispatch a transaction, using the `wrap` method to
-    // create the step that does the actual wrapping.
-    if (dispatch) {
-        dispatch(state.tr.wrap(range, wrapping).scrollIntoView());
+    /**
+     * Update view
+     * @param {EditorView} view 
+     * @param {EditorState} lastState 
+     */
+    update(view, lastState) {
+        let state = view.state;
+
+        // Don't do anything if the document/selection didn't change
+        if (lastState && lastState.doc.eq(state.doc) && lastState.selection.eq(state.selection)) {
+            return;
+        }
+        
+        // Hide the tooltip if the selection is empty
+        if (state.selection.empty) {
+            this.tooltip.style.display = "none";
+            return;
+        }
+
+        // Otherwise, reposition it and update its content
+        this.tooltip.style.display = "";
+        let { from, to } = state.selection;
+        // These are in screen coordinates
+        let start = view.coordsAtPos(from);
+        let end = view.coordsAtPos(to);
+        // The box in which the tooltip is positioned, to use as base
+        let box = this.tooltip.offsetParent.getBoundingClientRect()
+        // Find a center-ish x position from the selection endpoints (when
+        // crossing lines, end may be more to the left)
+        let left = Math.max((start.left + end.left) / 2, start.left + 3);
+        this.tooltip.style.left = (left - box.left) + 'px';
+        this.tooltip.style.bottom = (box.bottom - start.top) + 'px';
+        this.tooltip.textContent = to - from;
+    }
+
+    destroy() {
+        this.tooltip.destroy();
     }
 }
 
-/**
- * Toggle link
- * @param {EditorState} state 
- * @param {*} dispatch 
- */
-function toggleLink(state, dispatch) {
-    let { doc, selection } = state;
-    if (selection.empty) return;
-    let attrs = null;
-    if (doc.rangeHasMark(selection.from, selection.to, starSchema.marks.link)) {
-        attrs = { href: prompt("Link to where?", "") }
-        if (!attrs.href) return false;
-    }
-    return toggleMark(starSchema.marks.link, attrs)(state, dispatch);
-}
-
-/**
- * Insert star
- * @param {EditorState} state 
- * @param {*} dispatch 
- */
-function insertStar(state, dispatch) {
-    let type = starSchema.nodes.star;
-    let { $from } = state.selection;
-    if (!$from.parent.canReplaceWith($from.index(), $from.index(), type)) {
-        return false;
-    }
-    dispatch(state.tr.replaceSelectionWith(type.create()));
-    return true;
-}
-
-let starKeymap = keymap({
-    "Mod-b": toggleMark(starSchema.marks.shouting),
-    "Mod-q": toggleLink,
-    "Mod-Space": insertStar
-})
-
-let histKeymap = keymap({
-    "Mod-z": undo,
-    "Mod-y": redo
-})
-
-function start(place, content, shema, plugins = []) {
-    let doc = DOMParser.fromSchema(shema).parse(content);
-    return new EditorView(place, {
-        state: EditorState.create({
-            doc,
-            plugins: plugins.concat([histKeymap, keymap(baseKeymap), history()])
-        })
+window.view = new EditorView(document.querySelector("#editor"), {
+    state: EditorState.create({
+        doc: DOMParser.fromSchema(schema).parse(document.querySelector("#content")),
+        plugins: exampleSetup({ schema }).concat(selectionSizePlugin)
     })
-}
-
-function id(str) { return document.getElementById(str) }
-
-start({ mount: id("text-editor") }, id("text-content"), textSchema)
-start(id("note-editor"), id("note-content"), noteSchema, [keymap({ "Mod-Space": makeGroupNote })])
-start(id("star-editor"), id("star-content"), starSchema, [starKeymap]);
+})
