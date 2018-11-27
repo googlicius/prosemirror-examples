@@ -13,7 +13,7 @@ class SelectionSizeTooltip {
      * Tooltip element
      * @type HTMLDivElement
      */
-    // tooltip;
+    tooltip;
 
     /**
      * Constructor

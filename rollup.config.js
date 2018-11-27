@@ -1,6 +1,6 @@
 // Rollup plugins
 
-// import babel from 'rollup-plugin-babel';
+import babel from 'rollup-plugin-babel';
 import buble from 'rollup-plugin-buble';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
@@ -15,6 +15,9 @@ export default {
         // sourcemap: true,
     },
     plugins: [
+        babel({
+            exclude: 'node_modules/**'
+        }),
         resolve(),
         commonjs(),
         // uglify(),
