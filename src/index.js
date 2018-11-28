@@ -3,7 +3,8 @@ import { EditorView } from 'prosemirror-view';
 import { DOMParser } from "prosemirror-model";
 import { schema } from 'prosemirror-schema-basic';
 import { exampleSetup } from 'prosemirror-example-setup';
-import { toggleMark } from 'prosemirror-commands';
+import { toggleMark, setBlockType, wrapIn, baseKeymap } from 'prosemirror-commands';
+import { keymap } from 'prosemirror-keymap';
 
 /**
  * @typedef {Object} Item
@@ -49,7 +50,7 @@ class MenuView {
     }
 
     update() {
-        this.items.forEach(({command, dom}) => {
+        this.items.forEach(({ command, dom }) => {
             let active = command(this.editorView.state, null, this.editorView);
             dom.style.display = active ? "" : "none"
         })
@@ -70,8 +71,8 @@ function icon(text, name) {
 }
 
 /**
- * 
- * @param {Array} items 
+ * Create menu plugin
+ * @param {Array<{command: Function, dom: HTMLSpanElement}>} items 
  */
 function menuPlugin(items) {
     return new Plugin({
@@ -84,5 +85,18 @@ function menuPlugin(items) {
 }
 
 let menu = menuPlugin([
-    { command: toggleMark(schema.marks.strong), dom: icon("B", "strong") }
-])
+    { command: toggleMark(schema.marks.strong), dom: icon("B", "strong") },
+    { command: toggleMark(schema.marks.em), dom: icon("i", "em") },
+    { command: setBlockType(schema.nodes.paragraph), dom: icon("p", "paragraph") },
+    { command: setBlockType(schema.nodes.heading, { level: 1 }), dom: icon("H1", "heading") },
+    { command: setBlockType(schema.nodes.heading, { level: 2 }), dom: icon("H2", "heading") },
+    { command: setBlockType(schema.nodes.heading, { level: 3 }), dom: icon("H3", "heading") },
+    { command: wrapIn(schema.nodes.blockquote), dom: icon(">", "blockquote") }
+]);
+
+window.view = new EditorView(document.getElementById("editor"), {
+    state: EditorState.create({
+        doc: DOMParser.fromSchema(schema).parse(document.getElementById("content")),
+        plugins: [keymap(baseKeymap), menu]
+    })
+})
