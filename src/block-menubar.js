@@ -8,10 +8,10 @@ export function blockMenuBar(options) {
 
 class MenuBar {
     constructor(view, options) {
-        
+
     }
 
-    update = (view, lastState) {
+    update = (view, lastState) => {
         // 
     }
 
