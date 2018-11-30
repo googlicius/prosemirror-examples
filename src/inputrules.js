@@ -47,7 +47,7 @@ function bulletListRule(nodeType) {
 export function buildInputRules(schema) {
     let rules = smartQuotes.concat(ellipsis, emDash), type;
     if (type = schema.nodes.blockquote) rules.push(blockQuoteRule(type));
-    if (type = schema.nodes.orderred_list) rules.push(orderedListRule(type));
+    if (type = schema.nodes.ordered_list) rules.push(orderedListRule(type));
     if (type = schema.nodes.bullet_list) rules.push(bulletListRule(type));
     return inputRules({ rules });
 }

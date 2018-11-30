@@ -10,6 +10,40 @@
 
 <body>
   <style>
+    .blue-editor-inline-menu {
+      position: absolute;
+      /* pointer-events: none; */
+      z-index: 20;
+      background: white;
+      border: 1px solid silver;
+      border-radius: 2px;
+      padding: 2px 10px;
+      margin-bottom: 7px;
+      -webkit-transform: translateX(-50%);
+      transform: translateX(-50%);
+    }
+    .blue-editor-inline-menu:before {
+      content: "";
+      height: 0; width: 0;
+      position: absolute;
+      left: 50%;
+      margin-left: -5px;
+      bottom: -6px;
+      border: 5px solid transparent;
+      border-bottom-width: 0;
+      border-top-color: silver;
+    }
+    .blue-editor-inline-menu:after {
+      content: "";
+      height: 0; width: 0;
+      position: absolute;
+      left: 50%;
+      margin-left: -5px;
+      bottom: -4.5px;
+      border: 5px solid transparent;
+      border-bottom-width: 0;
+      border-top-color: white;
+    }
     .menubar {
       border-bottom: 1px solid rgba(0, 0, 0, 0.2);
       line-height: 0.1;
@@ -28,14 +62,31 @@
     .strong, .heading { font-weight: bold; }
     .em { font-style: italic; }
   
-    #editor { padding-top: 0 }
+    #editor { 
+      padding-top: 0;
+      position: relative;
+    }
   </style>
 
   <div id=editor></div>
 
   <div style="display: none" id=content>
-    <h3>Simple editor</h3>
-    <p>With a very crude menu bar.
+      <h3>Hello ProseMirror</h3>
+
+      <p>This is editable text. You can focus it and start typing.</p>
+    
+      <p>To apply styling, you can select a piece of text and manipulate
+      its styling from the menu. The basic schema
+      supports <em>emphasis</em>, <strong>strong
+      text</strong>, <a href="http://marijnhaverbeke.nl/blog">links</a>, <code>code
+      font</code>, and <img src="/img/smiley.png"> images.</p>
+    
+      <p>Block-level structure can be manipulated with key bindings (try
+      ctrl-shift-2 to create a level 2 heading, or enter in an empty
+      textblock to exit the parent block), or through the menu.</p>
+    
+      <p>Try using the “list” item in the menu to wrap this paragraph in
+      a numbered list.</p>
   </div>
 
   <!-- <script src="https://prosemirror.net/examples/prosemirror.js" type="text/javascript"></script>

@@ -15,6 +15,7 @@
   "author": "NHD",
   "license": "ISC",
   "dependencies": {
+    "crel": "^3.1.0",
     "prosemirror-commands": "^1.0.7",
     "prosemirror-example-setup": "^1.0.1",
     "prosemirror-history": "^1.0.3",
