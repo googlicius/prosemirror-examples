@@ -10,19 +10,26 @@
 
 <body>
   <style>
-    .blue-editor-inline-menu {
+    .block-menu-button {
       position: absolute;
-      /* pointer-events: none; */
+      z-index: 20;
+    }
+    .blue-editor-menu {
+      position: absolute;
       z-index: 20;
       background: white;
       border: 1px solid silver;
       border-radius: 2px;
       padding: 2px 10px;
+    }
+    .blue-editor-inline-menu,
+    .blue-editor-block-menu {
       margin-bottom: 7px;
       -webkit-transform: translateX(-50%);
       transform: translateX(-50%);
     }
-    .blue-editor-inline-menu:before {
+    .blue-editor-inline-menu::before,
+    .blue-editor-block-menu::before {
       content: "";
       height: 0; width: 0;
       position: absolute;
@@ -33,7 +40,8 @@
       border-bottom-width: 0;
       border-top-color: silver;
     }
-    .blue-editor-inline-menu:after {
+    .blue-editor-inline-menu::after,
+    .blue-editor-block-menu::after {
       content: "";
       height: 0; width: 0;
       position: absolute;
@@ -68,7 +76,7 @@
     }
   </style>
 
-  <div id=editor></div>
+  <div style="margin-left: 200px; margin-right: 200px" id=editor></div>
 
   <div style="display: none" id=content>
       <h3>Hello ProseMirror</h3>

@@ -1,7 +1,7 @@
 import { NodeType, MarkType, Schema } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 import { MenuItem, icons, wrapItem, joinUpItem, liftItem, selectParentNodeItem,
-    undoItem, redoItem } from 'prosemirror-menu';
+    undoItem, redoItem, blockTypeItem } from 'prosemirror-menu';
 import { toggleMark } from "prosemirror-commands";
 import { wrapInList } from "prosemirror-schema-list"
 
@@ -183,15 +183,22 @@ export function buildMenuItems(schema) {
             title: "Wrap in block quote",
             icon: icons.blockquote
         })
+
+    if (type = schema.nodes.heading) {
+            for (let i = 1; i <= 4; i++)
+                r["makeHead" + i] = blockTypeItem(type, {
+                    title: "Change to heading " + i,
+                    label: "H" + i,
+                    attrs: {level: i}
+                })
+        }
     
     /**
-     * 
      * @param {Array} arr 
      */
     let cut = arr => arr.filter(x => x);
     r.inlineMenu = [cut([r.toggleStrong, r.toggleEm, r.toggleCode, r.toggleLink])];
-    r.blockMenu = [cut([r.wrapBulletList, r.wrapOrderedList, r.wrapBlockQuote, joinUpItem,
-        liftItem, selectParentNodeItem])];
+    r.blockMenu = [cut([r.makeHead3, r.makeHead4, r.wrapBulletList, r.wrapOrderedList, r.wrapBlockQuote])];
     r.fullMenu = r.inlineMenu.concat([[undoItem, redoItem]], r.blockMenu)
 
     return r;

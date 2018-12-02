@@ -10,6 +10,7 @@ import { buildInputRules } from './inputrules';
 import { buildKeyMap } from './keymap';
 import { buildMenuItems } from './menu';
 import { inlineMenuBar } from './inline-menubar';
+import { blockMenuBar } from './block-menubar';
 
 // Mix the nodes from prosemirror-schema-list into the basic schema to
 // create a schema with list support.
@@ -32,11 +33,13 @@ const blueSchema = new Schema({
  * @returns {Array<Plugin>}
  */
 export function BlueEditorPlugins(options) {
+    const menuItems = buildMenuItems(options.schema);
     let plugins = [
         buildInputRules(options.schema),
         keymap(buildKeyMap(options.schema, options.keyMaps)),
         keymap(baseKeymap),
-        inlineMenuBar({ content: buildMenuItems(options.schema).fullMenu }),
+        inlineMenuBar({ content: menuItems.inlineMenu }),
+        blockMenuBar({ content: menuItems.blockMenu }),
         history()
     ]
 

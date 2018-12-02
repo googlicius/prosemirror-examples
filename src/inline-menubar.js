@@ -40,7 +40,7 @@ class MenuBarView {
         let prev;
 
         this.tooltip = document.createElement('div');
-        this.tooltip.className = "blue-editor-inline-menu";
+        this.tooltip.className = "blue-editor-menu blue-editor-inline-menu";
 
         let { dom, update } = renderGrouped(view, options.content);
         this.contentUpdate = update;
@@ -100,7 +100,7 @@ class MenuBarView {
         let left = Math.max((start.left + end.left) / 2, start.left + 3);
         const style_left = left - box.left;
         // Check `style_left < minLeft` to prevent the tooltip out of window.
-        this.tooltip.style.left = style_left < minLeft ? minLeft : style_left + 'px';
+        this.tooltip.style.left = style_left + 'px';
         this.tooltip.style.bottom = (box.bottom - start.top) + 'px';
     }
 
