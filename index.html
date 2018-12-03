@@ -13,6 +13,8 @@
     .block-menu-button {
       position: absolute;
       z-index: 20;
+      /* -webkit-transform: translateY(30%);
+      transform: translateY(30%); */
     }
     .blue-editor-menu {
       position: absolute;
@@ -52,6 +54,12 @@
       border-bottom-width: 0;
       border-top-color: white;
     }
+    .blue-editor-icon {
+      display: inline-block;
+      line-height: .8;
+      padding: 2px 8px;
+      cursor: pointer;
+    }
     .menubar {
       border-bottom: 1px solid rgba(0, 0, 0, 0.2);
       line-height: 0.1;
@@ -79,7 +87,8 @@
   <div style="margin-left: 200px; margin-right: 200px" id=editor></div>
 
   <div style="display: none" id=content>
-      <h3>Hello ProseMirror</h3>
+      <h1>Hello ProseMirror</h1>
+      <h2>This is heading level 2</h2>
 
       <p>This is editable text. You can focus it and start typing.</p>
     

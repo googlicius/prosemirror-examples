@@ -3,7 +3,7 @@ import { Plugin, EditorState } from 'prosemirror-state';
 import { keymap } from 'prosemirror-keymap';
 import { EditorView } from 'prosemirror-view';
 import { baseKeymap } from 'prosemirror-commands';
-import { schema } from 'prosemirror-schema-basic';
+import { schema } from './schema';
 import { addListNodes } from "prosemirror-schema-list"
 import { history } from 'prosemirror-history';
 import { buildInputRules } from './inputrules';
@@ -54,5 +54,5 @@ let view = new EditorView(document.querySelector("#editor"), {
     state: EditorState.create({
         doc: DOMParser.fromSchema(blueSchema).parse(document.querySelector("#content")),
         plugins: BlueEditorPlugins({ schema: blueSchema, keyMaps: null })
-    })
+    }),
 })

@@ -1,4 +1,4 @@
-import { Plugin } from 'prosemirror-state';
+import { Plugin, EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { renderGrouped, MenuItem } from 'prosemirror-menu';
 
@@ -27,8 +27,10 @@ class MenuBar {
             this.update(view, null);
         });
         this.menuButton.addEventListener("mouseover", () => {
-            this.contentUpdate(view.state);
-            this._displayTooltip(view);
+            if (this.tooltip.style.display == "none") {
+                this.contentUpdate(view.state);
+                this._displayTooltip(view);
+            }
         });
         let { dom, update } = renderGrouped(view, options.content);
         this.contentUpdate = update;
@@ -43,12 +45,12 @@ class MenuBar {
      */
     update = (view, lastState) => {
         // Hide the button when the editor lost focus
-        if(!view.hasFocus()) {
+        if (!view.hasFocus()) {
             this.menuButton.style.display = "none";
             this.tooltip.style.display = "none";
             return;
         }
-        if(this.tooltip.style.display == "") {
+        if (this.tooltip.style.display == "") {
             this.tooltip.style.display = "none";
         }
         this.menuButton.style.display = "";
@@ -70,7 +72,6 @@ class MenuBar {
         menuButton.style.left = "-30";
         // menuButton.textContent = "+";
         let { dom, update } = renderGrouped(view, [[this.menuButton()]]);
-        console.log(dom)
         menuButton.appendChild(dom);
         return menuButton;
     }
@@ -113,5 +114,17 @@ class MenuBar {
                 // ...
             }
         })
+    }
+
+    /**
+     * Select parent node, Will not select the document node
+     * @param {EditorState} state 
+     */
+    selectParentNode(state) {
+        let { $from, to } = state.selection, pos
+        let same = $from.sharedDepth(to)
+        if (same == 0) return false
+        pos = $from.before(same)
+        return true
     }
 }
