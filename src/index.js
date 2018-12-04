@@ -39,7 +39,7 @@ export function BlueEditorPlugins(options) {
         keymap(buildKeyMap(options.schema, options.keyMaps)),
         keymap(baseKeymap),
         inlineMenuBar({ content: menuItems.inlineMenu }),
-        blockMenuBar({ content: menuItems.blockMenu }),
+        blockMenuBar({ blockFormatMenu: menuItems.blockFormatMenu }),
         history()
     ]
 

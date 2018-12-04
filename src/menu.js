@@ -119,8 +119,8 @@ export function buildMenuItems(schema) {
      */
     let cut = arr => arr.filter(x => x);
     r.inlineMenu = [cut([r.toggleStrong, r.toggleEm, r.toggleCode, r.toggleLink])];
-    r.blockMenu = [cut([r.makeHead1, r.makeHead3, r.makeHead2, r.makeHead4, r.makeParagraph, r.wrapBulletList, r.wrapOrderedList, r.wrapBlockQuote])];
-    r.fullMenu = r.inlineMenu.concat([[undoItem, redoItem]], r.blockMenu)
+    r.blockFormatMenu = [cut([r.makeHead1, r.makeHead3, r.makeHead2, r.makeHead4, r.makeParagraph, r.wrapBulletList, r.wrapOrderedList, r.wrapBlockQuote])];
+    r.fullMenu = r.inlineMenu.concat([[undoItem, redoItem]], r.blockFormatMenu)
 
     return r;
 }

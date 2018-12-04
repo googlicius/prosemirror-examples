@@ -20,7 +20,7 @@ export default {
         }),
         resolve(),
         commonjs(),
-        uglify(),
+        // uglify(),
         buble()
     ],
     // external(id) { return !/^[\.\/]/.test(id) }

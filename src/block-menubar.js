@@ -2,9 +2,15 @@ import { Plugin, EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { renderGrouped, MenuItem } from 'prosemirror-menu';
 
-const buttonIcon = {
-    width: 32, height: 32,
-    path: "M12 0h16v4h-4v28h-4v-28h-4v28h-4v-16c-4.418 0-8-3.582-8-8s3.582-8 8-8z"
+const icons = {
+    buttonIcon: {
+        width: 32, height: 32,
+        path: "M12 0h16v4h-4v28h-4v-28h-4v28h-4v-16c-4.418 0-8-3.582-8-8s3.582-8 8-8z"
+    },
+    plusOutline: {
+        width: 20, height: 20,
+        path: "M11 9h4v2h-4v4h-2v-4h-4v-2h4v-4h2v4zM10 20c-5.523 0-10-4.477-10-10s4.477-10 10-10v0c5.523 0 10 4.477 10 10s-4.477 10-10 10v0zM10 18c4.418 0 8-3.582 8-8s-3.582-8-8-8v0c-4.418 0-8 3.582-8 8s3.582 8 8 8v0z"
+    }
 }
 
 export function blockMenuBar(options) {
@@ -16,25 +22,17 @@ export function blockMenuBar(options) {
 class MenuBar {
     /**
      * @param {EditorView} view 
-     * @param {*} options 
+     * @param {{blockFormatMenu: any}} options 
      */
     constructor(view, options) {
-        this.menuButton = this._createMenuButton(view);
+        this.blockMenu = this._createBlockMenu(view);
         this.tooltip = this._createTooltip();
-        view.dom.parentNode.appendChild(this.menuButton);
+        this.options = options;
+        view.dom.parentNode.appendChild(this.blockMenu);
         view.dom.parentNode.appendChild(this.tooltip);
         view.dom.addEventListener("blur", () => {
             this.update(view, null);
         });
-        this.menuButton.addEventListener("mouseover", () => {
-            if (this.tooltip.style.display == "none") {
-                this.contentUpdate(view.state);
-                this._positionTooltip(view);
-            }
-        });
-        let { dom, update } = renderGrouped(view, options.content);
-        this.contentUpdate = update;
-        this.tooltip.appendChild(dom);
         this.update(view, null);
     }
 
@@ -49,33 +47,37 @@ class MenuBar {
         
         // Hide the button when the editor lost focus
         if (!view.hasFocus()) {
-            this.menuButton.style.display = "none";
+            this.blockMenu.style.display = "none";
             this.tooltip.style.display = "none";
             return;
         }
         if (this.tooltip.style.display == "") {
             this.tooltip.style.display = "none";
         }
+        let lastStart;
         const start = view.coordsAtPos(from);
-        const lastStart = view.coordsAtPos(lastFrom || 0);
-        if(start.top != lastStart.top) {
-            this._positionButton(view);
+        try {
+            lastStart = view.coordsAtPos(lastFrom || 0);
+        } catch (error) {
+            // If lastFrom out of document, An error will be raised.
+        }
+        if(this.blockMenu.style.display == "none" || !lastStart || start.top != lastStart.top) {
+            this._positionBlockMenu(view);
         }
     }
 
     destroy = () => {
-        this.menuButton.destroy();
+        this.blockMenu.destroy();
         this.tooltip.destroy();
     }
 
-    _createMenuButton = (view) => {
-        const menuButton = document.createElement('div');
-        menuButton.className = "block-menu-button";
-        menuButton.style.left = "-30";
-        // menuButton.textContent = "+";
-        let { dom, update } = renderGrouped(view, [[this.menuButton()]]);
-        menuButton.appendChild(dom);
-        return menuButton;
+    _createBlockMenu = (view) => {
+        const blockMenu = document.createElement('div');
+        blockMenu.className = "block-menu-button";
+        blockMenu.style.left = "-65px";
+        let { dom, update } = renderGrouped(view, [[this._insertMenuItem(), this._formatMenuItem()]]);
+        blockMenu.appendChild(dom);
+        return blockMenu;
     }
 
     _createTooltip = () => {
@@ -94,7 +96,7 @@ class MenuBar {
         let { from } = state.selection;
         // These are in screen coordinates
         let start = view.coordsAtPos(from);
-        const menuRect = this.menuButton.getBoundingClientRect();
+        const menuRect = this.blockMenu.getBoundingClientRect();
         // The box in which the tooltip is positioned, to use as base
         let box = this.tooltip.offsetParent.getBoundingClientRect();
         // Find a center-ish x position from the selection endpoints (when
@@ -109,25 +111,43 @@ class MenuBar {
      * Display and position the block-button.
      * @param {EditorView} view 
      */
-    _positionButton = view => {
-        this.menuButton.style.display = "";
+    _positionBlockMenu = view => {
+        this.blockMenu.style.display = "";
         const { from } = view.state.selection;
         // These are in screen coordinates
         let start = view.coordsAtPos(from);
-        console.log(start)
-        let box = this.menuButton.offsetParent.getBoundingClientRect();
-        this.menuButton.style.bottom = box.bottom - start.bottom + "px";
+        let box = this.blockMenu.offsetParent.getBoundingClientRect();
+        this.blockMenu.style.bottom = box.bottom - start.bottom + "px";
     }
 
     /**
-     * Build button.
+     * Build format menu item.
      */
-    menuButton = () => {
+    _formatMenuItem = () => {
         return new MenuItem({
-            title: "",
-            icon: buttonIcon,
-            run(state, dispatch, view) {
-                // ...
+            title: "Định dạng khối",
+            icon: icons.buttonIcon,
+            run: (state, _, view) => {
+                if (this.tooltip.style.display == "none") {
+                    let { dom, update } = renderGrouped(view, this.options.blockFormatMenu);
+                    this.tooltip.innerHTML = '';
+                    this.tooltip.appendChild(dom);
+                    update(view.state);
+                    this._positionTooltip(view);
+                }
+                else {
+                    this.tooltip.style.display = "none";
+                }
+            }
+        })
+    }
+
+    _insertMenuItem = () => {
+        return new MenuItem({
+            title: "Chèn",
+            icon: icons.plusOutline,
+            run: (state, _, view) => {
+
             }
         })
     }
