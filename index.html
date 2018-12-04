@@ -37,10 +37,7 @@
       position: absolute;
       left: 50%;
       margin-left: -5px;
-      bottom: -6px;
       border: 5px solid transparent;
-      border-bottom-width: 0;
-      border-top-color: silver;
     }
     .blue-editor-inline-menu::after,
     .blue-editor-block-menu::after {
@@ -49,10 +46,32 @@
       position: absolute;
       left: 50%;
       margin-left: -5px;
-      bottom: -4.5px;
       border: 5px solid transparent;
+    }
+
+    .blue-editor-inline-menu.arrow-down::before,
+    .blue-editor-block-menu.arrow-down::before {
+      border-top-color: silver;
       border-bottom-width: 0;
+      bottom: -6px;
+    }
+    .blue-editor-inline-menu.arrow-down::after,
+    .blue-editor-block-menu.arrow-down::after {
       border-top-color: white;
+      border-bottom-width: 0;
+      bottom: -4.5px;
+    }
+    .blue-editor-inline-menu.arrow-up::before,
+    .blue-editor-block-menu.arrow-up::before {
+      border-bottom-color: silver;
+      border-top-width: 0;
+      bottom: 25px;
+    }
+    .blue-editor-inline-menu.arrow-up::after,
+    .blue-editor-block-menu.arrow-up::after {
+      border-bottom-color: white;
+      border-top-width: 0;
+      bottom: 24.5px;
     }
     .blue-editor-icon {
       display: inline-block;
@@ -87,27 +106,28 @@
   <div style="margin-left: 200px; margin-right: 200px" id=editor></div>
 
   <div style="display: none" id=content>
-      <h1>Hello ProseMirror</h1>
-      <h2>This is heading level 2</h2>
+    <h1>Hello ProseMirror</h1>
+    <h2>This is heading level 2</h2>
 
-      <p>This is editable text. You can focus it and start typing.</p>
-    
-      <p>To apply styling, you can select a piece of text and manipulate
+    <p>This is editable text. You can focus it and start typing.</p>
+
+    <p>To apply styling, you can select a piece of text and manipulate
       its styling from the menu. The basic schema
       supports <em>emphasis</em>, <strong>strong
-      text</strong>, <a href="http://marijnhaverbeke.nl/blog">links</a>, <code>code
+        text</strong>, <a href="http://marijnhaverbeke.nl/blog">links</a>, <code>code
       font</code>, and <img src="/img/smiley.png"> images.</p>
-    
-      <p>Block-level structure can be manipulated with key bindings (try
+
+    <p>Block-level structure can be manipulated with key bindings (try
       ctrl-shift-2 to create a level 2 heading, or enter in an empty
       textblock to exit the parent block), or through the menu.</p>
-    
-      <p>Try using the “list” item in the menu to wrap this paragraph in
+
+    <p>Try using the “list” item in the menu to wrap this paragraph in
       a numbered list.</p>
   </div>
 
   <!-- <script src="https://prosemirror.net/examples/prosemirror.js" type="text/javascript"></script>
     <script src="require-pm.js"></script> -->
+  <script src="https://unpkg.com/prosemirror-dev-tools@1.4.0/dist/umd/prosemirror-dev-tools.min.js"></script>
   <script src="dist/index.js" type="text/javascript"></script>
 </body>
 

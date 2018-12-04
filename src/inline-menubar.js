@@ -40,7 +40,7 @@ class MenuBarView {
         let prev;
 
         this.tooltip = document.createElement('div');
-        this.tooltip.className = "blue-editor-menu blue-editor-inline-menu";
+        this.tooltip.className = "blue-editor-menu blue-editor-inline-menu arrow-down";
 
         let { dom, update } = renderGrouped(view, options.content);
         this.contentUpdate = update;
@@ -83,10 +83,26 @@ class MenuBarView {
         // Don't do anything if mouse is down
         if(this.mousedown) return;
 
-        this.contentUpdate(state);
-
         // Otherwise, reposition it and update its content
+        this.contentUpdate(state);
+        this._positionTooltip(view);
+    }
+
+    destroy = () => {
+        this.tooltip.remove();
+    }
+
+    /**
+     * Display and position tooltip
+     * @param {EditorView} view
+     */
+    _positionTooltip = (view) => {
+        const state = view.state;
         this.tooltip.style.display = "";
+        this.tooltip.style.top = null;
+        this.tooltip.style.bottom = null;
+        this.tooltip.classList.remove("arrow-up");
+        this.tooltip.classList.add("arrow-down");
         let { from, to } = state.selection;
         // These are in screen coordinates
         let start = view.coordsAtPos(from);
@@ -102,9 +118,15 @@ class MenuBarView {
         // Check `style_left < minLeft` to prevent the tooltip out of window.
         this.tooltip.style.left = style_left + 'px';
         this.tooltip.style.bottom = (box.bottom - start.top) + 'px';
-    }
 
-    destroy = () => {
-        this.tooltip.remove();
+        // Check whether tooltip is overlap screen.
+        const tooltipBox = this.tooltip.getBoundingClientRect();
+        if(tooltipBox.top < 0) {
+            // Display the tooltip from bottom of selection
+            this.tooltip.classList.remove("arrow-down");
+            this.tooltip.classList.add("arrow-up");
+            this.tooltip.style.bottom = null;
+            this.tooltip.style.top =  start.bottom - box.top + 'px';
+        }
     }
 }

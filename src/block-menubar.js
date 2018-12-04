@@ -29,7 +29,7 @@ class MenuBar {
         this.menuButton.addEventListener("mouseover", () => {
             if (this.tooltip.style.display == "none") {
                 this.contentUpdate(view.state);
-                this._displayTooltip(view);
+                this._positionTooltip(view);
             }
         });
         let { dom, update } = renderGrouped(view, options.content);
@@ -44,6 +44,9 @@ class MenuBar {
      * @param {EditorState} lastState 
      */
     update = (view, lastState) => {
+        let from = view.state.selection.from;
+        let lastFrom = lastState ? lastState.selection.from : null;
+        
         // Hide the button when the editor lost focus
         if (!view.hasFocus()) {
             this.menuButton.style.display = "none";
@@ -53,12 +56,11 @@ class MenuBar {
         if (this.tooltip.style.display == "") {
             this.tooltip.style.display = "none";
         }
-        this.menuButton.style.display = "";
-        const { from } = view.state.selection;
-        // These are in screen coordinates
-        let start = view.coordsAtPos(from);
-        let box = this.menuButton.offsetParent.getBoundingClientRect();
-        this.menuButton.style.bottom = (box.bottom - start.bottom) - 3 + "px";
+        const start = view.coordsAtPos(from);
+        const lastStart = view.coordsAtPos(lastFrom || 0);
+        if(start.top != lastStart.top) {
+            this._positionButton(view);
+        }
     }
 
     destroy = () => {
@@ -78,15 +80,15 @@ class MenuBar {
 
     _createTooltip = () => {
         const tooltip = document.createElement('div');
-        tooltip.className = "blue-editor-menu blue-editor-block-menu";
+        tooltip.className = "blue-editor-menu blue-editor-block-menu arrow-down";
         return tooltip;
     }
 
     /**
-     * Show block-menubar on `mouseover` the button
+     * Display and position block-menubar on `mouseover` the button
      * @param {EditorView} view 
      */
-    _displayTooltip = (view) => {
+    _positionTooltip = (view) => {
         let state = view.state;
         this.tooltip.style.display = "";
         let { from } = state.selection;
@@ -101,6 +103,20 @@ class MenuBar {
         // Check `style_left < minLeft` to prevent the tooltip out of window.
         this.tooltip.style.left = left - box.left + 'px';
         this.tooltip.style.bottom = (box.bottom - start.top) + 'px';
+    }
+
+    /**
+     * Display and position the block-button.
+     * @param {EditorView} view 
+     */
+    _positionButton = view => {
+        this.menuButton.style.display = "";
+        const { from } = view.state.selection;
+        // These are in screen coordinates
+        let start = view.coordsAtPos(from);
+        console.log(start)
+        let box = this.menuButton.offsetParent.getBoundingClientRect();
+        this.menuButton.style.bottom = box.bottom - start.bottom + "px";
     }
 
     /**

@@ -1,12 +1,6 @@
-import { NodeType, MarkType, Schema } from 'prosemirror-model';
-import { EditorState } from 'prosemirror-state';
-import {
-    MenuItem, icons, wrapItem, joinUpItem, liftItem, selectParentNodeItem,
-    undoItem, redoItem, blockTypeItem
-} from 'prosemirror-menu';
-import { toggleMark, setBlockType } from "prosemirror-commands";
-import { wrapInList } from "prosemirror-schema-list";
-import { selectHeading1 } from './menu-item-helpers';
+import { Schema } from 'prosemirror-model';
+import { icons, undoItem, redoItem } from 'prosemirror-menu';
+import { makeHeading, insertImageItem, markItem, linkItem, wrapListItem, wrapBlockquote } from './menu-item';
 
 const customIcons = {
     biggerHeading: {
@@ -21,118 +15,6 @@ const customIcons = {
 
 // Helpers to create specific types of items
 
-/**
- * Can insert
- * @param {EditorState} state 
- * @param {NodeType} nodeType 
- */
-function canInsert(state, nodeType) {
-    let $from = state.selection.$from;
-    for (let d = $from.depth; d >= 0; d--) {
-        let index = $from.index(d);
-        if ($from.node(d).canReplaceWith(index, index, nodeType)) return true;
-    }
-    return false;
-}
-
-/**
- * insert image item
- * @param {NodeType} nodeType 
- */
-function insertImageItem(nodeType) {
-    return new MenuItem({
-        title: "Image insert",
-        label: "Image",
-        enable: state => canInsert(state, nodeType),
-        run(state, _, view) {
-            // ...
-        }
-    })
-}
-
-function cmdItem(cmd, options) {
-    let passedOptions = {
-        label: options.title,
-        run: cmd
-    }
-    for (let prop in options) passedOptions[prop] = options[prop]
-    if ((!options.enable || options.enable === true) && !options.select)
-        passedOptions[options.enable ? "enable" : "select"] = state => cmd(state)
-
-    return new MenuItem(passedOptions)
-}
-
-/**
- * Check whether the selection is in given type.
- * 
- * @param {EditorState} state 
- * @param {MarkType} type 
- * @returns {boolean}
- */
-function markActive(state, type) {
-    let { from, $from, to, empty } = state.selection;
-    if (empty) return type.isInSet(state.storedMarks || $from.marks());
-    else return state.doc.rangeHasMark(from, to, type);
-}
-
-/**
- * 
- * @param {MarkType} markType 
- * @param {*} options 
- */
-function markItem(markType, options) {
-    let passedOptions = {
-        active: state => markActive(state, markType),
-        enable: true
-    }
-    for (let prop in options) passedOptions[prop] = options[prop]
-    return cmdItem(toggleMark(markType), passedOptions)
-}
-
-/**
- * 
- * @param {MarkType} markType 
- */
-function linkItem(markType) {
-    return new MenuItem({
-        title: "Add or remove link",
-        icon: icons.link,
-        active: state => markActive(state, markType),
-        enable: state => !state.selection.empty,
-        run(state, dispatch, view) {
-            // ...
-        }
-    })
-}
-
-function wrapListItem(nodeType, options) {
-    return cmdItem(wrapInList(nodeType, options.attrs), options)
-}
-
-/**
- * Build a heading item, h1 and h2 for the first and second blocks, rest are h3 and h4.
- * 
- * @param {number} level
- */
-function makeHeading(level, icon) {
-    const isHeading = state => {
-        const node = state.selection.$from.node(1);
-        return node.type.name == "heading" && node.attrs.level == level;
-    }
-    return new MenuItem({
-        title: "Add heading",
-        icon: icon,
-        class: "blue-editor-icon",
-        active: isHeading,
-        select: state => selectHeading1(state),
-        run(state, dispatch) {
-            if (isHeading(state)) {
-                return setBlockType(state.schema.nodes.paragraph)(state, dispatch);
-            }
-            return setBlockType(state.schema.nodes.heading, { level })(state, dispatch);
-        }
-    });
-}
 
 /**
  * :: (Schema) → Object
@@ -219,7 +101,7 @@ export function buildMenuItems(schema) {
             icon: icons.orderedList
         })
     if (type = schema.nodes.blockquote) {
-        r.wrapBlockQuote = wrapItem(type, {
+        r.wrapBlockQuote = wrapBlockquote(type, {
             title: "Wrap in block quote",
             icon: icons.blockquote
         })
@@ -227,9 +109,9 @@ export function buildMenuItems(schema) {
 
     if (type = schema.nodes.heading) {
         r.makeHead1 = makeHeading(1, customIcons.biggerHeading);
-        r.makeHead2 = makeHeading(2, customIcons.biggerHeading);
-        r.makeHead3 = makeHeading(3, customIcons.smallerHeading);
-        r.makeHead4 = makeHeading(4, customIcons.biggerHeading);
+        r.makeHead2 = makeHeading(2, customIcons.smallerHeading);
+        r.makeHead3 = makeHeading(3, customIcons.biggerHeading);
+        r.makeHead4 = makeHeading(4, customIcons.smallerHeading);
     }
 
     /**
@@ -237,7 +119,7 @@ export function buildMenuItems(schema) {
      */
     let cut = arr => arr.filter(x => x);
     r.inlineMenu = [cut([r.toggleStrong, r.toggleEm, r.toggleCode, r.toggleLink])];
-    r.blockMenu = [cut([r.makeHead1, r.makeHead3, r.makeParagraph, r.wrapBulletList, r.wrapOrderedList, r.wrapBlockQuote])];
+    r.blockMenu = [cut([r.makeHead1, r.makeHead3, r.makeHead2, r.makeHead4, r.makeParagraph, r.wrapBulletList, r.wrapOrderedList, r.wrapBlockQuote])];
     r.fullMenu = r.inlineMenu.concat([[undoItem, redoItem]], r.blockMenu)
 
     return r;
