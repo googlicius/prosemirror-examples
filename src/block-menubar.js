@@ -40,6 +40,18 @@ class MenuBar {
     updateTimer;
 
     /**
+     * viewport rectangle at a given document position of `lastState`
+     * @type {{left: number, right: number, top: number, bottom: number}}
+     */
+    lastStart;
+
+    /**
+     * childCount of selectedNode of `lastState`
+     * @type {number}
+     */
+    lastChildCount;
+
+    /**
      * @param {EditorView} view 
      * @param {{blockFormatMenu: Array<MenuElement>, blockInsertMenu: Array<MenuElement>}} options 
      */
@@ -55,30 +67,13 @@ class MenuBar {
         this.update(view, null);
     }
 
-    _setUpdateTimer = (doThing = null) => {
-        if (this.updateTimer) {
-            clearTimeout(this.updateTimer);
-        }
-        this.updateTimer = setTimeout(() => {
-            this.updateTimer = null;
-            if (doThing) {
-                doThing();
-            }
-        }, 500);
-    }
-
     /**
      * Update view
      * 
      * @param {EditorView} view 
      * @param {EditorState} lastState 
      */
-    update = (view, lastState) => {
-        let from = view.state.selection.from;
-        let lastFrom = lastState ? lastState.selection.from : null;
-        let childCount = view.state.selection.$from.node(1).childCount;
-        let lastChildCount = lastState ? lastState.selection.$from.node(1).childCount : null;
-
+    update = (view, lastState) => {        
         // Hide the button when the editor lost focus
         if (!view.hasFocus()) {
             this.blockMenu.style.display = "none";
@@ -88,22 +83,22 @@ class MenuBar {
         if (this.tooltip.style.display == "") {
             this.tooltip.style.display = "none";
         }
-        let lastStart;
+        
+        const from = view.state.selection.from;
         const start = view.coordsAtPos(from);
-        try {
-            lastStart = view.coordsAtPos(lastFrom || 0);
-        } catch (error) {
-            // If lastFrom out of document, An error will be raised.
-        }
-        if (this.blockMenu.style.display == "none" || (lastStart && start.top != lastStart.top)) {
-            console.log("blockMenu.style.display", this.blockMenu.style.display);
-            console.log("(lastStart && start.top != lastStart.top)", (lastStart && start.top != lastStart.top));
-            console.log("start.top != lastStart.top", start.top != lastStart.top);
-            console.log("childCount != lastChildCount", childCount != lastChildCount);
-            console.log("===============")
+        const selectedNode = view.state.selection.$from.node(1);
+        const childCount = selectedNode && selectedNode.childCount;
+
+        if (this.blockMenu.style.display == "none" || (this.lastStart && start.top != this.lastStart.top)) {
             this._positionBlockMenu(view);
+        }
+        
+        if(this.lastChildCount != childCount) {
             this.updateBlockMenu(view.state);
         }
+
+        this.lastStart = start;
+        this.lastChildCount = childCount;
     }
 
     destroy = () => {
@@ -133,7 +128,7 @@ class MenuBar {
     }
 
     /**
-     * Display and position block-menubar on `mouseover` the button
+     * Display and position the tooltip
      * 
      * @param {EditorView} view 
      */
@@ -220,7 +215,8 @@ class MenuBar {
                 },
                 select: state => {
                     const selectedNode = state.selection.$from.node(1);
-                    return selectedNode && selectedNode.childCount == 0;
+                    const childCount = selectedNode && selectedNode.childCount;
+                    return childCount === 0;
                 }
             })
         }
