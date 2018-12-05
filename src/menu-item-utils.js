@@ -51,13 +51,13 @@ export function selectHeading (state, level) {
     }
 
     // At first node, hide h3, h4
-    if(selectedNode.eq(firstNode)) {
+    if(selectedNode && selectedNode.eq(firstNode)) {
         if([3, 4].includes(level)) {
             return false;
         }
     }
     // At second node, hide h1, h4
-    else if(selectedNode.eq(secondNode)) {
+    else if(selectedNode && selectedNode.eq(secondNode)) {
         if([1, 4].includes(level)) {
             return false;
         }
@@ -78,7 +78,7 @@ export function selectHeading (state, level) {
  */
 export function enableHeading(state, level) {
     const selectedNode  = state.selection.$from.node(1);
-    if(selectedNode.type.name != "heading") {
+    if(selectedNode && selectedNode.type.name != "heading") {
         return setBlockType(state.schema.nodes.heading, { level })(state);
     }
     return true;

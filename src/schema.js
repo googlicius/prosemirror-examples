@@ -99,6 +99,23 @@ export const nodes = {
         selectable: false,
         parseDOM: [{ tag: "br" }],
         toDOM() { return ["br"] }
+    },
+
+    // :: NodeSpec A new part, represented in the DOM as `(<div class="new-part">)`
+    new_part: {
+        inline: true,
+        group: "inline",
+        selectable: false,
+        parseDOM: [{ tag: "div.new-part" }],
+        toDOM: () => ["div", { class: "new-part" }, 0]
+    },
+
+    // :: NodeSpec A dropcap, represented in the DOM as `<span class="dropcap">`
+    dropcap: {
+        inline: true,
+        group: "inline",
+        parseDOM: [{ tag: "span.dropcap" }],
+        toDOM: () => ["span", { class: "dropcap" }, 0]
     }
 }
 

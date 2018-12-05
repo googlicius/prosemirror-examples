@@ -8,10 +8,53 @@ import { wrapInList } from "prosemirror-schema-list";
  * insert image item
  * @param {NodeType} nodeType 
  */
-export function insertImageItem(nodeType) {
+export function insertImageItem(nodeType, options) {
     return new MenuItem({
-        title: "Image insert",
-        label: "Image",
+        ...options,
+        enable: state => canInsert(state, nodeType),
+        run(state, _, view) {
+            // ...
+        }
+    })
+}
+
+/**
+ * insert image item
+ * @param {NodeType} nodeType 
+ */
+export function insertVideoItem(nodeType, options) {
+    return new MenuItem({
+        ...options,
+        enable: state => canInsert(state, nodeType),
+        run(state, _, view) {
+            // ...
+        }
+    })
+}
+
+/**
+ * insert a new part item
+ * @param {NodeType} nodeType 
+ */
+export function insertNewPartItem(nodeType, options) {
+    return new MenuItem({
+        ...options,
+        enable: state => canInsert(state, nodeType),
+        run(state, _, view) {
+            // ...
+        }
+    })
+}
+
+/**
+ * Build a dropcap on selected block.
+ * 
+ * @param {NodeType} nodeType 
+ * @param {*} options 
+ */
+export function makeDropcap(nodeType, options) {
+    return new MenuItem({
+        ...options,
         enable: state => canInsert(state, nodeType),
         run(state, _, view) {
             // ...
@@ -23,15 +66,15 @@ export function insertImageItem(nodeType) {
  * Build a heading item, h1 and h2 for the first and second blocks, rest are h3 and h4.
  * 
  * @param {number} level
+ * @param {*} options
  */
-export function makeHeading(level, icon) {
+export function makeHeading(level, options) {
     const isHeading = state => {
-        const node = state.selection.$from.node(1);
-        return node.type.name == "heading" && node.attrs.level == level;
+        const selectedNode = state.selection.$from.node(1);
+        return selectedNode && selectedNode.type.name == "heading" && selectedNode.attrs.level == level;
     }
     return new MenuItem({
-        title: "Add heading",
-        icon: icon,
+        ...options,
         class: "blue-editor-icon",
         active: isHeading,
         select: state => selectHeading(state, level),
@@ -104,7 +147,7 @@ export function wrapBlockquote(nodeType, options) {
     const isActive = state => {
         const selectedNode = state.selection.$from.node(1);
         const wrappedIn = wrapIn(nodeType, options.attrs instanceof Function ? null : options.attrs)(state);
-        if (selectedNode.type.name == "blockquote" && !wrappedIn) {
+        if (selectedNode && selectedNode.type.name == "blockquote" && !wrappedIn) {
             return true;
         }
         return false;

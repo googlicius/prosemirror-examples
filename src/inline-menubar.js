@@ -2,7 +2,7 @@ import { Plugin, EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { renderGrouped } from 'prosemirror-menu';
 
-function isIOS123() {
+export function isIOS123() {
     if (typeof navigator == "undefined") return false
     let agent = navigator.userAgent
     return !/Edge\/\d/.test(agent) && /AppleWebKit/.test(agent) && /Mobile\/\w+/.test(agent)
@@ -20,7 +20,7 @@ function isIOS123() {
  * passed to `renderGrouped`.
  * @param {*} options 
  */
-export function inlineMenuBar(options) {
+export default function inlineMenuBar(options) {
     return new Plugin({
         view: editorView => new MenuBarView(editorView, options)
     })

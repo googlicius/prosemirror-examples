@@ -44,7 +44,7 @@ function bulletListRule(nodeType) {
  * @param {Schema} schema
  * @returns {Plugin}
  */
-export function buildInputRules(schema) {
+export default function buildInputRules(schema) {
     let rules = smartQuotes.concat(ellipsis, emDash), type;
     if (type = schema.nodes.blockquote) rules.push(blockQuoteRule(type));
     if (type = schema.nodes.ordered_list) rules.push(orderedListRule(type));

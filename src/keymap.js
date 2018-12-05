@@ -13,7 +13,7 @@ const mac = typeof navigator != "undefined" ? /Mac/.test(navigator.platform) : f
  * @param {Schema} schema
  * @param {*} mapKeys 
  */
-export const buildKeyMap = (schema, mapKeys) => {
+export default function buildKeyMap(schema, mapKeys) {
     let keys = {};
     let type;
 

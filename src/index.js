@@ -3,14 +3,14 @@ import { Plugin, EditorState } from 'prosemirror-state';
 import { keymap } from 'prosemirror-keymap';
 import { EditorView } from 'prosemirror-view';
 import { baseKeymap } from 'prosemirror-commands';
-import { schema } from './schema';
 import { addListNodes } from "prosemirror-schema-list";
 import { history } from 'prosemirror-history';
-import { buildInputRules } from './inputrules';
-import { buildKeyMap } from './keymap';
-import { buildMenuItems } from './menu';
-import { inlineMenuBar } from './inline-menubar';
-import { blockMenuBar } from './block-menubar';
+import { schema } from './schema';
+import buildInputRules from './inputrules';
+import buildKeyMap from './keymap';
+import buildMenuItems from './menu';
+import inlineMenuBar from './inline-menubar';
+import blockMenuBar from './block-menubar';
 
 // Mix the nodes from prosemirror-schema-list into the basic schema to
 // create a schema with list support.
@@ -39,7 +39,10 @@ export function BlueEditorPlugins(options) {
         keymap(buildKeyMap(options.schema, options.keyMaps)),
         keymap(baseKeymap),
         inlineMenuBar({ content: menuItems.inlineMenu }),
-        blockMenuBar({ blockFormatMenu: menuItems.blockFormatMenu }),
+        blockMenuBar({
+            blockFormatMenu: menuItems.blockFormatMenu,
+            blockInsertMenu: menuItems.blockInsertMenu
+        }),
         history()
     ]
 
@@ -57,4 +60,5 @@ const state = EditorState.create({
 
 let view = new EditorView(document.querySelector("#editor"), { state })
 
+// Apply ProseMirror dev-tools
 ProseMirrorDevTools.applyDevTools(view, { EditorState: state });

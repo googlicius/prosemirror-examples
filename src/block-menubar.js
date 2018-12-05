@@ -13,7 +13,16 @@ const icons = {
     }
 }
 
-export function blockMenuBar(options) {
+const blockMenus = {
+    insert: "insert-menu",
+    format: "format-menu",
+}
+
+/**
+ * A Plugin that build a menu on block-level
+ * @param {*} options 
+ */
+export default function blockMenuBar(options) {
     return new Plugin({
         view: editorView => new MenuBar(editorView, options)
     })
@@ -21,8 +30,18 @@ export function blockMenuBar(options) {
 
 class MenuBar {
     /**
+     * @type {string}
+     */
+    currentMenu;
+
+    /**
+     * @type NodeJS.Timer
+     */
+    updateTimer;
+
+    /**
      * @param {EditorView} view 
-     * @param {{blockFormatMenu: any}} options 
+     * @param {{blockFormatMenu: Array<MenuElement>, blockInsertMenu: Array<MenuElement>}} options 
      */
     constructor(view, options) {
         this.blockMenu = this._createBlockMenu(view);
@@ -36,15 +55,30 @@ class MenuBar {
         this.update(view, null);
     }
 
+    _setUpdateTimer = (doThing = null) => {
+        if (this.updateTimer) {
+            clearTimeout(this.updateTimer);
+        }
+        this.updateTimer = setTimeout(() => {
+            this.updateTimer = null;
+            if (doThing) {
+                doThing();
+            }
+        }, 500);
+    }
+
     /**
      * Update view
+     * 
      * @param {EditorView} view 
      * @param {EditorState} lastState 
      */
     update = (view, lastState) => {
         let from = view.state.selection.from;
         let lastFrom = lastState ? lastState.selection.from : null;
-        
+        let childCount = view.state.selection.$from.node(1).childCount;
+        let lastChildCount = lastState ? lastState.selection.$from.node(1).childCount : null;
+
         // Hide the button when the editor lost focus
         if (!view.hasFocus()) {
             this.blockMenu.style.display = "none";
@@ -61,8 +95,14 @@ class MenuBar {
         } catch (error) {
             // If lastFrom out of document, An error will be raised.
         }
-        if(this.blockMenu.style.display == "none" || !lastStart || start.top != lastStart.top) {
+        if (this.blockMenu.style.display == "none" || (lastStart && start.top != lastStart.top)) {
+            console.log("blockMenu.style.display", this.blockMenu.style.display);
+            console.log("(lastStart && start.top != lastStart.top)", (lastStart && start.top != lastStart.top));
+            console.log("start.top != lastStart.top", start.top != lastStart.top);
+            console.log("childCount != lastChildCount", childCount != lastChildCount);
+            console.log("===============")
             this._positionBlockMenu(view);
+            this.updateBlockMenu(view.state);
         }
     }
 
@@ -71,11 +111,17 @@ class MenuBar {
         this.tooltip.destroy();
     }
 
+    /**
+     * @param {EditorView} view
+     */
     _createBlockMenu = (view) => {
+        const domRect = view.dom.getBoundingClientRect();
         const blockMenu = document.createElement('div');
+        const menuItems = this._buildMenuItems();
         blockMenu.className = "block-menu-button";
-        blockMenu.style.left = "-65px";
-        let { dom, update } = renderGrouped(view, [[this._insertMenuItem(), this._formatMenuItem()]]);
+        blockMenu.style.right = `${domRect.right - domRect.left}px`;
+        let { dom, update } = renderGrouped(view, [[menuItems.menuItem_Insert(), menuItems.menuItem_Format()]]);
+        this.updateBlockMenu = update;
         blockMenu.appendChild(dom);
         return blockMenu;
     }
@@ -88,6 +134,7 @@ class MenuBar {
 
     /**
      * Display and position block-menubar on `mouseover` the button
+     * 
      * @param {EditorView} view 
      */
     _positionTooltip = (view) => {
@@ -96,7 +143,8 @@ class MenuBar {
         let { from } = state.selection;
         // These are in screen coordinates
         let start = view.coordsAtPos(from);
-        const menuRect = this.blockMenu.getBoundingClientRect();
+        const menuItem = this.blockMenu.querySelector(`.${this.currentMenu}`);
+        const menuRect = menuItem.getBoundingClientRect();
         // The box in which the tooltip is positioned, to use as base
         let box = this.tooltip.offsetParent.getBoundingClientRect();
         // Find a center-ish x position from the selection endpoints (when
@@ -121,35 +169,63 @@ class MenuBar {
     }
 
     /**
-     * Build format menu item.
+     * Build Menu items
      */
-    _formatMenuItem = () => {
-        return new MenuItem({
-            title: "Định dạng khối",
-            icon: icons.buttonIcon,
-            run: (state, _, view) => {
-                if (this.tooltip.style.display == "none") {
-                    let { dom, update } = renderGrouped(view, this.options.blockFormatMenu);
-                    this.tooltip.innerHTML = '';
-                    this.tooltip.appendChild(dom);
-                    update(view.state);
-                    this._positionTooltip(view);
-                }
-                else {
-                    this.tooltip.style.display = "none";
-                }
+    _buildMenuItems = () => {
+        /**
+         * Render or hide the menu.
+         * 
+         * @param {EditorView} view 
+         * @param {string} menu_name 
+         * @param {Array<MenuElement>} content
+         */
+        const renderMenu = (view, menu_name, content) => {
+            if (this.tooltip.style.display == "none" || this.currentMenu != menu_name) {
+                this.currentMenu = menu_name;
+                let { dom, update } = renderGrouped(view, content);
+                this.tooltip.innerHTML = '';
+                this.tooltip.appendChild(dom);
+                update(view.state);
+                this._positionTooltip(view);
             }
-        })
-    }
-
-    _insertMenuItem = () => {
-        return new MenuItem({
-            title: "Chèn",
-            icon: icons.plusOutline,
-            run: (state, _, view) => {
-
+            else {
+                this.tooltip.style.display = "none";
             }
-        })
+        }
+
+        /**
+         * Build format menu item.
+         */
+        const menuItem_Format = () => {
+            return new MenuItem({
+                title: "Định dạng khối",
+                icon: icons.buttonIcon,
+                class: blockMenus.format,
+                run: (state, _, view) => {
+                    renderMenu(view, blockMenus.format, this.options.blockFormatMenu);
+                },
+            })
+        }
+
+        /**
+         * Build insert menu item.
+         */
+        const menuItem_Insert = () => {
+            return new MenuItem({
+                title: "Chèn",
+                icon: icons.plusOutline,
+                class: blockMenus.insert,
+                run: (state, _, view) => {
+                    renderMenu(view, blockMenus.insert, this.options.blockInsertMenu);
+                },
+                select: state => {
+                    const selectedNode = state.selection.$from.node(1);
+                    return selectedNode && selectedNode.childCount == 0;
+                }
+            })
+        }
+
+        return { menuItem_Format, menuItem_Insert };
     }
 
     /**
