@@ -61,9 +61,7 @@ class MenuBar {
         this.options = options;
         view.dom.parentNode.appendChild(this.blockMenu);
         view.dom.parentNode.appendChild(this.tooltip);
-        view.dom.addEventListener("blur", () => {
-            this.update(view, null);
-        });
+        ["blur", "focus"].forEach(event => view.dom.addEventListener(event, () => this.update(view, null)));
         this.update(view, null);
     }
 
@@ -73,7 +71,7 @@ class MenuBar {
      * @param {EditorView} view 
      * @param {EditorState} lastState 
      */
-    update = (view, lastState) => {        
+    update = (view, lastState) => {
         // Hide the button when the editor lost focus
         if (!view.hasFocus()) {
             this.blockMenu.style.display = "none";
@@ -135,6 +133,10 @@ class MenuBar {
     _positionTooltip = (view) => {
         let state = view.state;
         this.tooltip.style.display = "";
+        this.tooltip.style.top = null;
+        this.tooltip.style.bottom = null;
+        this.tooltip.classList.remove("arrow-up");
+        this.tooltip.classList.add("arrow-down");
         let { from } = state.selection;
         // These are in screen coordinates
         let start = view.coordsAtPos(from);
@@ -148,6 +150,16 @@ class MenuBar {
         // Check `style_left < minLeft` to prevent the tooltip out of window.
         this.tooltip.style.left = left - box.left + 'px';
         this.tooltip.style.bottom = (box.bottom - start.top) + 'px';
+
+        // Check whether tooltip is overlap screen.
+        const tooltipBox = this.tooltip.getBoundingClientRect();
+        if(tooltipBox.top < 0) {
+            // Display the tooltip from bottom of selection
+            this.tooltip.classList.remove("arrow-down");
+            this.tooltip.classList.add("arrow-up");
+            this.tooltip.style.bottom = null;
+            this.tooltip.style.top =  start.bottom - box.top + 'px';
+        }
     }
 
     /**

@@ -1,8 +1,10 @@
-import { toggleMark, setBlockType, wrapIn } from "prosemirror-commands";
+import { toggleMark, setBlockType, wrapIn, chainCommands } from "prosemirror-commands";
 import { canInsert, markActive, selectHeading, enableHeading } from './menu-item-utils';
 import { MenuItem, icons } from 'prosemirror-menu';
-import { EditorState } from 'prosemirror-state';
+import { NodeType } from 'prosemirror-model';
+import { EditorState, TextSelection } from 'prosemirror-state';
 import { wrapInList } from "prosemirror-schema-list";
+// import { canInsert } from 'prosemirror-utils';
 
 /**
  * insert image item
@@ -40,10 +42,19 @@ export function insertNewPartItem(nodeType, options) {
     return new MenuItem({
         ...options,
         enable: state => canInsert(state, nodeType),
-        run(state, _, view) {
-            // ...
+        run(state, dispatch) {
+            const selectedNode = state.selection.$from.node(1);
+            const lastChild = state.doc.lastChild;
+            const tr = state.tr;
+            if(lastChild.eq(selectedNode)) {
+                tr.insert(state.selection.from - 1, nodeType.create());
+            }
+            else {
+                tr.replaceSelectionWith(nodeType.create());
+            }
+            dispatch(tr.scrollIntoView());
         }
-    })
+    });
 }
 
 /**

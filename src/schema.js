@@ -103,11 +103,10 @@ export const nodes = {
 
     // :: NodeSpec A new part, represented in the DOM as `(<div class="new-part">)`
     new_part: {
-        inline: true,
-        group: "inline",
+        group: "block",
         selectable: false,
-        parseDOM: [{ tag: "div.new-part" }],
-        toDOM: () => ["div", { class: "new-part" }, 0]
+        parseDOM: [{ tag: "hr.new-part" }],
+        toDOM: () => ["hr", { class: "new-part" }, 0]
     },
 
     // :: NodeSpec A dropcap, represented in the DOM as `<span class="dropcap">`
