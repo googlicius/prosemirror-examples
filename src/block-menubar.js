@@ -35,11 +35,6 @@ class MenuBar {
     currentMenu;
 
     /**
-     * @type NodeJS.Timer
-     */
-    updateTimer;
-
-    /**
      * viewport rectangle at a given document position of `lastState`
      * @type {{left: number, right: number, top: number, bottom: number}}
      */
@@ -227,8 +222,7 @@ class MenuBar {
                 },
                 select: state => {
                     const selectedNode = state.selection.$from.node(1);
-                    const childCount = selectedNode && selectedNode.childCount;
-                    return childCount === 0;
+                    return selectedNode && selectedNode.childCount === 0;
                 }
             })
         }

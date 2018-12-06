@@ -29,6 +29,7 @@ export const nodes = {
     // :: NodeSpec A horizontal rule (`<hr>`).
     horizontal_rule: {
         group: "block",
+        selectable: false,
         parseDOM: [{ tag: "hr" }],
         toDOM() { return ["hr"] }
     },
@@ -99,14 +100,6 @@ export const nodes = {
         selectable: false,
         parseDOM: [{ tag: "br" }],
         toDOM() { return ["br"] }
-    },
-
-    // :: NodeSpec A new part, represented in the DOM as `(<div class="new-part">)`
-    new_part: {
-        group: "block",
-        selectable: false,
-        parseDOM: [{ tag: "hr.new-part" }],
-        toDOM: () => ["hr", { class: "new-part" }, 0]
     },
 
     // :: NodeSpec A dropcap, represented in the DOM as `<span class="dropcap">`

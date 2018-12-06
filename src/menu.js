@@ -125,8 +125,8 @@ export default function buildMenuItems(schema) {
             icon: icons.blockquote
         })
     }
-    if(type = schema.nodes.new_part) {
-        r.inserNewPart = fromMenuItem.insertNewPartItem(type, {
+    if(type = schema.nodes.horizontal_rule) {
+        r.inserNewPart = fromMenuItem.horizonRuleItem(type, {
             title: "Thêm một phần mới",
             icon: customIcons.newPart
         })

@@ -38,7 +38,7 @@ export function insertVideoItem(nodeType, options) {
  * insert a new part item
  * @param {NodeType} nodeType 
  */
-export function insertNewPartItem(nodeType, options) {
+export function horizonRuleItem(nodeType, options) {
     return new MenuItem({
         ...options,
         enable: state => canInsert(state, nodeType),
