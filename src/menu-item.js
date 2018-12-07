@@ -15,7 +15,13 @@ export function insertImageItem(nodeType, options) {
         ...options,
         enable: state => canInsert(state, nodeType),
         run(state, _, view) {
-            // ...
+            const cmd = (url) => {
+                console.log("Run command to change the view that display the uploaded image.");
+                const data = state.doc.toJSON();
+                console.log(JSON.stringify(data))
+            }
+            console.log("Open modal for uploading image");
+            setTimeout(() => cmd("url"), 500);
         }
     })
 }

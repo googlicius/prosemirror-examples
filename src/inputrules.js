@@ -38,6 +38,13 @@ function bulletListRule(nodeType) {
     return wrappingInputRule(/^\s*([-+*])\s$/, nodeType);
 }
 
+// : (NodeType) → InputRule
+// Given a code block node type, returns an input rule that turns a
+// textblock starting with three backticks into a code block.
+export function codeBlockRule(nodeType) {
+    return textblockTypeInputRule(/^```$/, nodeType)
+}
+
 /**
  * A set of input rules for creating the basic block quotes, lists,
  * code blocks, and heading.
@@ -49,5 +56,6 @@ export default function buildInputRules(schema) {
     if (type = schema.nodes.blockquote) rules.push(blockQuoteRule(type));
     if (type = schema.nodes.ordered_list) rules.push(orderedListRule(type));
     if (type = schema.nodes.bullet_list) rules.push(bulletListRule(type));
+    if(type = schema.nodes.code_block) rules.push(codeBlockRule(type));
     return inputRules({ rules });
 }
