@@ -1,102 +1,112 @@
-import { Plugin, EditorState } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { DOMParser } from "prosemirror-model";
+import { Plugin } from 'prosemirror-state';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
+import { EditorState, Transaction } from 'prosemirror-state';
+import { DOMParser } from 'prosemirror-model';
 import { schema } from 'prosemirror-schema-basic';
 import { exampleSetup } from 'prosemirror-example-setup';
-import { toggleMark, setBlockType, wrapIn, baseKeymap } from 'prosemirror-commands';
-import { keymap } from 'prosemirror-keymap';
 
-/**
- * @typedef {Object} Item
- * @property {HTMLElement} dom
- * @property {(state: EditorState, dispatch: Function, view: EditorView)} command
- */
-
-class MenuView {
-    dom = document.createElement("div");
-
-    /**
-     * @type Array<Item>
-     */
-    items;
-
-    /**
-     * @type EditorView
-     */
-    editorView;
-
-    /**
-     * Constructor
-     * @param {Array<Item>} items 
-     * @param {EditorView} editorView 
-     */
-    constructor(items, editorView) {
-        this.dom.className = "menubar";
-        this.items = items;
-        this.editorView = editorView;
-
-        this.items.forEach(({ dom }) => this.dom.appendChild(dom));
-        this.update();
-
-        this.dom.addEventListener("mousedown", e => {
-            e.preventDefault();
-            editorView.focus();
-            items.forEach(({ command, dom }) => {
-                if (dom.contains(e.target)) {
-                    command(editorView.state, editorView.dispatch, editorView);
-                }
-            })
-        })
-    }
-
-    update() {
-        this.items.forEach(({ command, dom }) => {
-            let active = command(this.editorView.state, null, this.editorView);
-            dom.style.display = active ? "" : "none"
-        })
-    }
-
-    destroy() {
-        this.dom.destroy();
-    }
-}
-
-// Helper function to create menu icons
-function icon(text, name) {
-    let span = document.createElement("span")
-    span.className = "menuicon " + name
-    span.title = name
-    span.textContent = text
-    return span
-}
-
-/**
- * Create menu plugin
- * @param {Array<{command: Function, dom: HTMLSpanElement}>} items 
- */
-function menuPlugin(items) {
-    return new Plugin({
-        view(editorView) {
-            let menuView = new MenuView(items, editorView);
-            editorView.dom.parentNode.insertBefore(menuView.dom, editorView.dom);
-            return menuView;
+const placeholderPlugin = new Plugin({
+    state: {
+        init: () => DecorationSet.empty,
+        /**
+         * Apply
+         * @param {Transaction} tr 
+         * @param {DecorationSet} set 
+         */
+        apply(tr, set) {
+            // Adjust decoration positions to changes made by the transaction
+            set = set.map(tr.mapping, tr.doc);
+            // See if the transaction adds or removes any placeholders
+            let action = tr.getMeta(this);
+            if (action && action.add) {
+                let widget = document.createElement("placeholder");
+                let deco = Decoration.widget(action.add.pos, widget, { id: action.add.id });
+                set = set.add(tr.doc, [deco]);
+            }
+            else if (action && action.remove) {
+                set = set.remove(set.find(null, null, spec => spec.id == action.remove.id));
+            }
+            return set;
         }
+    },
+    props: {
+        decorations(state) {
+            return this.getState(state);
+        }
+    }
+});
+
+/**
+ * Find placeholder
+ * @param {EditorState} state 
+ * @param {*} id 
+ */
+function findPlaceholder(state, id) {
+    let decos = placeholderPlugin.getState(state)
+    let found = decos.find(null, null, spec => spec.id == id);
+    return found.length && found[0].from;
+}
+
+// This is just a dummy that loads the file and creates a data URL.
+// You could swap it out with a function that does an actual upload
+// and returns a regular URL for the uploaded file.
+function uploadFile(file) {
+    let reader = new FileReader
+    return new Promise((accept, fail) => {
+        reader.onload = () => accept(reader.result)
+        reader.onerror = () => fail(reader.error)
+        // Some extra delay to make the asynchronicity visible
+        setTimeout(() => reader.readAsDataURL(file), 1500)
     })
 }
 
-let menu = menuPlugin([
-    { command: toggleMark(schema.marks.strong), dom: icon("B", "strong") },
-    { command: toggleMark(schema.marks.em), dom: icon("i", "em") },
-    { command: setBlockType(schema.nodes.paragraph), dom: icon("p", "paragraph") },
-    { command: setBlockType(schema.nodes.heading, { level: 1 }), dom: icon("H1", "heading") },
-    { command: setBlockType(schema.nodes.heading, { level: 2 }), dom: icon("H2", "heading") },
-    { command: setBlockType(schema.nodes.heading, { level: 3 }), dom: icon("H3", "heading") },
-    { command: wrapIn(schema.nodes.blockquote), dom: icon(">", "blockquote") }
-]);
+/**
+ * Start upload file
+ * @param {EditorView} view 
+ * @param {*} file 
+ */
+function startUploadFile(view, file) {
+    // A fresh object to act as the ID for this upload
+    let id = {}
 
-window.view = new EditorView(document.getElementById("editor"), {
+    // Replace seletion with a placeholder
+    let tr = view.state.tr;
+    if (!tr.selection.empty) tr.deleteSelection();
+    tr.setMeta(
+        placeholderPlugin,
+        {
+            add: { id, pos: tr.selection.from }
+        }
+    );
+    view.dispatch(tr);
+
+    uploadFile(file).then(url => {
+        let pos = findPlaceholder(view.state, id);
+        let tr = view.state.tr;
+        // If the content around the placeholder has been deleted, drop
+        // the image
+        if (pos == null) return;
+        // Otherwise, insert it at the placeholder's position, and remove
+        // the placeholder
+        tr.replaceWith(pos, pos, schema.nodes.image.create({ src: url }));
+        tr.setMeta(placeholderPlugin, { remove: { id } });
+        view.dispatch(tr);
+    }, () => {
+        // On failure, just clean up the placeholder
+        view.dispatch(view.state.tr.setMeta(placeholderPlugin, { remove: { id } }))
+    });
+}
+
+let view = new EditorView(document.getElementById("editor"), {
     state: EditorState.create({
         doc: DOMParser.fromSchema(schema).parse(document.getElementById("content")),
-        plugins: [keymap(baseKeymap), menu]
+        plugins: exampleSetup({ schema }).concat(placeholderPlugin)
     })
+});
+
+document.getElementById("image-upload").addEventListener("change", e => {
+    if(view.state.selection.$from.parent.inlineContent && e.target.files.length) {
+        startUploadFile(view, e.target.files[0]);
+    }
+    view.focus();
 })
