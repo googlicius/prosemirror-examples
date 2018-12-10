@@ -103,6 +103,12 @@ export default function buildMenuItems(schema) {
         r.toggleCode = fromMenuItem.markItem(type, { title: "Toggle code font", icon: icons.code });
     if (type = schema.marks.link)
         r.toggleLink = fromMenuItem.linkItem(type);
+    if (type = schema.marks.dropcap) {
+        r.makeDropcap = fromMenuItem.makeDropcap(type, {
+            title: "Dropcap",
+            icon: customIcons.dropCap
+        })
+    }
 
     if (type = schema.nodes.image)
         r.insertImage = fromMenuItem.insertImageItem(type, {
@@ -125,17 +131,10 @@ export default function buildMenuItems(schema) {
             icon: icons.blockquote
         })
     }
-    if(type = schema.nodes.horizontal_rule) {
+    if (type = schema.nodes.horizontal_rule) {
         r.inserNewPart = fromMenuItem.horizonRuleItem(type, {
             title: "Thêm một phần mới",
             icon: customIcons.newPart
-        })
-    }
-    // console.log("LKJKKJKJ", schema.nodes.dropcap)
-    if(type = schema.nodes.dropcap) {
-        r.makeDropcap = fromMenuItem.makeDropcap(type, {
-            title: "Dropcap",
-            icon: customIcons.dropCap
         })
     }
 

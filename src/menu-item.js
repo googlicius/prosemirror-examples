@@ -1,8 +1,8 @@
-import { toggleMark, setBlockType, wrapIn, chainCommands } from "prosemirror-commands";
+import { toggleMark, setBlockType, wrapIn } from "prosemirror-commands";
 import { canInsert, markActive, selectHeading, enableHeading } from './menu-item-utils';
 import { MenuItem, icons } from 'prosemirror-menu';
-import { NodeType } from 'prosemirror-model';
-import { EditorState, TextSelection } from 'prosemirror-state';
+import { NodeType, MarkType } from 'prosemirror-model';
+import { EditorState } from 'prosemirror-state';
 import { wrapInList } from "prosemirror-schema-list";
 // import { canInsert } from 'prosemirror-utils';
 
@@ -49,10 +49,10 @@ export function horizonRuleItem(nodeType, options) {
         ...options,
         enable: state => canInsert(state, nodeType),
         run(state, dispatch) {
-            const selectedNode = state.selection.$from.node(1);
+            const selectedNode = state.selection.$from.parent;
             const lastChild = state.doc.lastChild;
             const tr = state.tr;
-            if(lastChild.eq(selectedNode)) {
+            if (lastChild.eq(selectedNode)) {
                 tr.insert(state.selection.from - 1, nodeType.create());
             }
             else {
@@ -66,15 +66,49 @@ export function horizonRuleItem(nodeType, options) {
 /**
  * Build a dropcap on selected block.
  * 
- * @param {NodeType} nodeType 
+ * @param {MarkType} markType 
  * @param {*} options 
  */
-export function makeDropcap(nodeType, options) {
+export function makeDropcap(markType, options) {
+    /**
+     * Toggle dropcap
+     * @param {EditorState} state 
+     * @param {?Function} dispatch 
+     */
+    const toggleDropcap = (state, dispatch) => {
+        const selectedNode = state.selection.$from.parent;
+        const { $from } = state.selection;
+        if (!selectedNode || selectedNode.textContent.length == 0 || selectedNode.type != state.schema.nodes.paragraph) return false;
+
+        let dropcapWord = selectedNode.textContent.replace(/ .*/, '');
+        dropcapWord = dropcapWord.length <= 2 ? dropcapWord : dropcapWord.substr(0, 1);
+        const from = $from.pos - $from.parentOffset;
+        if (dispatch) {
+            if(isActiveDropcap(state)) {
+                dispatch(state.tr.removeMark(from, from + dropcapWord.length, markType.create()).scrollIntoView());
+            }
+            else {
+                dispatch(state.tr.addMark(from, from + dropcapWord.length, markType.create()).scrollIntoView());
+            }
+        }
+        return true;
+    }
+    /**
+     * Check paragraph has dropcap
+     * @param {EditorState} state 
+     */
+    const isActiveDropcap = (state) => {
+        const { $from } = state.selection;
+        const from = $from.pos - $from.parentOffset;
+        const resolvePosition = state.doc.resolve(from);
+        return markType.isInSet(resolvePosition.marks());
+    }
     return new MenuItem({
         ...options,
-        enable: state => canInsert(state, nodeType),
-        run(state, _, view) {
-            // ...
+        active: state => isActiveDropcap(state),
+        enable: state => toggleDropcap(state),
+        run(state, dispatch) {
+            toggleDropcap(state, dispatch);
         }
     })
 }
@@ -87,7 +121,7 @@ export function makeDropcap(nodeType, options) {
  */
 export function makeHeading(level, options) {
     const isHeading = state => {
-        const selectedNode = state.selection.$from.node(1);
+        const selectedNode = state.selection.$from.parent;
         return selectedNode && selectedNode.type.name == "heading" && selectedNode.attrs.level == level;
     }
     return new MenuItem({
@@ -162,7 +196,7 @@ export function wrapBlockquote(nodeType, options) {
      * @param {EditorState} state 
      */
     const isActive = state => {
-        const selectedNode = state.selection.$from.node(1);
+        const selectedNode = state.selection.$from.parent;
         const wrappedIn = wrapIn(nodeType, options.attrs instanceof Function ? null : options.attrs)(state);
         if (selectedNode && selectedNode.type.name == "blockquote" && !wrappedIn) {
             return true;

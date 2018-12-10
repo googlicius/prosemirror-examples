@@ -47,17 +47,18 @@ class MenuBarView {
         this.tooltip.appendChild(dom);
 
         view.dom.parentNode.appendChild(this.tooltip);
-        document.addEventListener('mousedown', e => {
+        view.dom.addEventListener('mousedown', () => {
             this.mousedown = true;
             prev = view.state;
-        })
-        document.addEventListener('mouseup', e => {
+        });
+        // Listen event from document, not from view.dow
+        document.addEventListener('mouseup', () => {
             this.mousedown = false;
             if(!view.state.selection.empty) {
                 this.update(view, prev);
                 prev = null;
             }
-        })
+        });
         this.update(view, null);
     }
 
@@ -69,14 +70,14 @@ class MenuBarView {
     update = (view, lastState) => {
         let state = view.state;
 
-        // Don't do anything if the document/selection didn't change
-        if (lastState && lastState.doc.eq(state.doc) && lastState.selection.eq(state.selection)) {
-            return;
-        }
-
         // Hide the tooltip if the selection is empty
         if (state.selection.empty) {
             this.tooltip.style.display = "none";
+            return;
+        }
+
+        // Don't do anything if the document/selection didn't change
+        if (lastState && lastState.doc.eq(state.doc) && lastState.selection.eq(state.selection)) {
             return;
         }
 

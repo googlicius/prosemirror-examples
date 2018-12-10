@@ -100,14 +100,6 @@ export const nodes = {
         selectable: false,
         parseDOM: [{ tag: "br" }],
         toDOM() { return ["br"] }
-    },
-
-    // :: NodeSpec A dropcap, represented in the DOM as `<span class="dropcap">`
-    dropcap: {
-        inline: true,
-        group: "inline",
-        parseDOM: [{ tag: "span.dropcap" }],
-        toDOM: () => ["span", { class: "dropcap" }, 0]
     }
 }
 
@@ -153,6 +145,13 @@ export const marks = {
     code: {
         parseDOM: [{ tag: "code" }],
         toDOM() { return ["code"] }
+    },
+
+    // :: MarkSpec A dropcap, represented in the DOM as `<span class="dropcap">`
+    dropcap: {
+        // attrs: { contenteditable: "false" },
+        parseDOM: [{ tag: "span.dropcap" }],
+        toDOM: () => ["span", { class: "dropcap" }]
     }
 }
 

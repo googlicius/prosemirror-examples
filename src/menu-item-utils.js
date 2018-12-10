@@ -35,7 +35,7 @@ export function markActive(state, type) {
  * @param {number} level
  */
 export function selectHeading (state, level) {
-    const selectedNode  = state.selection.$from.node(1);
+    const selectedNode  = state.selection.$from.parent;
     // Get first node and second node of document
     let firstNode, secondNode;
     try {
@@ -77,7 +77,7 @@ export function selectHeading (state, level) {
  * @param {number} level 
  */
 export function enableHeading(state, level) {
-    const selectedNode  = state.selection.$from.node(1);
+    const selectedNode  = state.selection.$from.parent;
     if(selectedNode && selectedNode.type.name != "heading") {
         return setBlockType(state.schema.nodes.heading, { level })(state);
     }

@@ -47,6 +47,11 @@ class MenuBar {
     lastChildCount;
 
     /**
+     * @type ProsemirrorNode
+     */
+    lastSeletedNode;
+
+    /**
      * @param {EditorView} view 
      * @param {{blockFormatMenu: Array<MenuElement>, blockInsertMenu: Array<MenuElement>}} options 
      */
@@ -77,12 +82,15 @@ class MenuBar {
             this.tooltip.style.display = "none";
         }
         
-        const from = view.state.selection.from;
+        const { $from } = view.state.selection;
+        const from = $from.pos - $from.parentOffset;
         const start = view.coordsAtPos(from);
-        const selectedNode = view.state.selection.$from.node(1);
+        const selectedNode = view.state.selection.$from.parent;
         const childCount = selectedNode && selectedNode.childCount;
+        const sameMarkup = () => this.lastSeletedNode && selectedNode && selectedNode.sameMarkup(this.lastSeletedNode);
+        const sameTop = () => this.lastStart && start.top == this.lastStart.top;
 
-        if (this.blockMenu.style.display == "none" || (this.lastStart && start.top != this.lastStart.top)) {
+        if (this.blockMenu.style.display == "none" || !sameTop() || !sameMarkup()) {
             this._positionBlockMenu(view);
         }
         
@@ -92,6 +100,7 @@ class MenuBar {
 
         this.lastStart = start;
         this.lastChildCount = childCount;
+        this.lastSeletedNode = selectedNode;
     }
 
     destroy = () => {
@@ -132,7 +141,8 @@ class MenuBar {
         this.tooltip.style.bottom = null;
         this.tooltip.classList.remove("arrow-up");
         this.tooltip.classList.add("arrow-down");
-        let { from } = state.selection;
+        const { $from } = state.selection;
+        const from = $from.pos - $from.parentOffset;
         // These are in screen coordinates
         let start = view.coordsAtPos(from);
         const menuItem = this.blockMenu.querySelector(`.${this.currentMenu}`);
@@ -162,12 +172,14 @@ class MenuBar {
      * @param {EditorView} view 
      */
     _positionBlockMenu = view => {
-        this.blockMenu.style.display = "";
-        const { from } = view.state.selection;
+        const { $from } = view.state.selection;
+        const from = $from.pos - $from.parentOffset;
         // These are in screen coordinates
         let start = view.coordsAtPos(from);
+        this.blockMenu.style.display = "";
         let box = this.blockMenu.offsetParent.getBoundingClientRect();
-        this.blockMenu.style.bottom = box.bottom - start.bottom + "px";
+        const center = (start.top + start.bottom) / 2;
+        this.blockMenu.style.bottom = box.bottom - center + "px";
     }
 
     /**
@@ -221,7 +233,7 @@ class MenuBar {
                     renderMenu(view, blockMenus.insert, this.options.blockInsertMenu);
                 },
                 select: state => {
-                    const selectedNode = state.selection.$from.node(1);
+                    const selectedNode = state.selection.$from.parent;
                     return selectedNode && selectedNode.childCount === 0;
                 }
             })
