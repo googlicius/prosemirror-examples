@@ -1,4 +1,4 @@
-import { Schema } from "prosemirror-model"
+import { Schema, MarkSpec } from "prosemirror-model"
 
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -111,7 +111,8 @@ export const marks = {
     link: {
         attrs: {
             href: {},
-            title: { default: null }
+            title: { default: null },
+            contenteditable: { default: false }
         },
         inclusive: false,
         parseDOM: [{
@@ -149,9 +150,17 @@ export const marks = {
 
     // :: MarkSpec A dropcap, represented in the DOM as `<span class="dropcap">`
     dropcap: {
-        // attrs: { contenteditable: "false" },
-        parseDOM: [{ tag: "span.dropcap" }],
-        toDOM: () => ["span", { class: "dropcap" }]
+        inclusive: false,
+        excludes: "_",
+        attrs: {
+            contenteditable: { default: false }
+        },
+        parseDOM: [{ 
+            tag: "span.dropcap", getAttrs(dom) {
+                return { contenteditable: dom.getAttribute("contenteditable") }
+            }
+        }],
+        toDOM: () => ["span", { class: "dropcap", contenteditable: false }]
     }
 }
 

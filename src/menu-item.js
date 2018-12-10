@@ -100,8 +100,7 @@ export function makeDropcap(markType, options) {
     const isActiveDropcap = (state) => {
         const { $from } = state.selection;
         const from = $from.pos - $from.parentOffset;
-        const resolvePosition = state.doc.resolve(from);
-        return markType.isInSet(resolvePosition.marks());
+        return state.doc.rangeHasMark(from, from + 1, markType);
     }
     return new MenuItem({
         ...options,
