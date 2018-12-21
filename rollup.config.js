@@ -10,8 +10,8 @@ export default {
     input: "./src/index.js",
     output: {
         file: "dist/index.js",
-        format: "iife",
-        name: "index",
+        format: "umd",
+        name: "BlueEditor",
         // sourcemap: true,
     },
     plugins: [
@@ -20,7 +20,7 @@ export default {
         }),
         resolve(),
         commonjs(),
-        // uglify(),
+        uglify(),
         buble()
     ],
     // external(id) { return !/^[\.\/]/.test(id) }

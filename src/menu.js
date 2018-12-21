@@ -2,6 +2,8 @@ import { Schema } from 'prosemirror-model';
 import { icons, undoItem, redoItem } from 'prosemirror-menu';
 import * as fromMenuItem from './menu-item';
 
+export const myConsole = fromMenuItem.thisIsConsoleSth;
+
 const customIcons = {
     biggerHeading: {
         width: 21, height: 21,

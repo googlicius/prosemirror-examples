@@ -1,4 +1,4 @@
-import { Schema, MarkSpec } from "prosemirror-model"
+import { Schema } from "prosemirror-model"
 
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.

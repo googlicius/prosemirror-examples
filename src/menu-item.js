@@ -212,3 +212,7 @@ export function wrapBlockquote(nodeType, options) {
     for (let prop in options) passedOptions[prop] = options[prop]
     return new MenuItem(passedOptions)
 }
+
+export function thisIsConsoleSth(variable) {
+    console.log(variable);
+}

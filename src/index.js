@@ -63,7 +63,7 @@ function BlueEditorPlugins(options) {
   * The Blue Editor
   * @param {BlueEditorSpec} options 
   */
- function BlueEditor(options) {
+ export default function BlueEditor(options) {
     let doc;
     if(typeof options.content == "string") {
         doc = Node.fromJSON(blueSchema, JSON.parse(options.content));
@@ -81,11 +81,3 @@ function BlueEditorPlugins(options) {
         
     return { state, view };
 }
-
-const { state, view } = BlueEditor({
-    editorElement: document.querySelector("#editor"),
-    content: '{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Hello ProseMirror"}]},{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"This is heading level 2"}]},{"type":"horizontal_rule"},{"type":"paragraph","content":[{"type":"text","marks":[{"type":"dropcap","attrs":{"contenteditable":false}}],"text":"T"},{"type":"text","text":"his is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing.vThis is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing."}]},{"type":"paragraph","content":[{"type":"text","text":"To apply styling, you can select a piece of text and manipulate its styling from the menu. The basic schema supports "},{"type":"text","marks":[{"type":"em"}],"text":"emphasis"},{"type":"text","text":", "},{"type":"text","marks":[{"type":"strong"}],"text":"strong text"},{"type":"text","text":", "},{"type":"text","marks":[{"type":"link","attrs":{"href":"http://marijnhaverbeke.nl/blog","title":null,"contenteditable":false}}],"text":"links"},{"type":"text","text":", "},{"type":"text","marks":[{"type":"code"}],"text":"code font"},{"type":"text","text":", and "},{"type":"image","attrs":{"src":"/img/smiley.png","alt":null,"title":null}},{"type":"text","text":" images."}]},{"type":"paragraph","content":[{"type":"text","text":"Block-level structure can be manipulated with key bindings (try ctrl-shift-2 to create a level 2 heading, or enter in an empty textblock to exit the parent block), or through the menu."}]},{"type":"paragraph","content":[{"type":"text","text":"Try using the “list” item in the menu to wrap this paragraph in a numbered list."}]},{"type":"code_block","content":[{"type":"text","text":"It OK"}]}]}'
-});
-
-// Apply ProseMirror dev-tools
-ProseMirrorDevTools.applyDevTools(view, { EditorState: state });
