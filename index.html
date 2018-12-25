@@ -1,153 +1,16 @@
-<html lang="en">
+<!doctype html>
+<html>
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+  <title>ProseMirror Examples</title>
+  <meta charset="utf8">
   <link rel=stylesheet href="https://prosemirror.net/css/editor.css">
 </head>
 
 <body>
-  <style>
-    .block-menu-button {
-      position: absolute;
-      z-index: 20;
-      white-space: nowrap;
-      -webkit-transform: translateY(50%);
-      transform: translateY(50%);
-    }
-    .blue-editor-menu {
-      position: absolute;
-      z-index: 20;
-      background: white;
-      border: 1px solid silver;
-      border-radius: 2px;
-      padding: 2px 10px;
-    }
-    .blue-editor-inline-menu,
-    .blue-editor-block-menu {
-      margin-bottom: 7px;
-      -webkit-transform: translateX(-50%);
-      transform: translateX(-50%);
-    }
-    .blue-editor-inline-menu::before,
-    .blue-editor-block-menu::before {
-      content: "";
-      height: 0; width: 0;
-      position: absolute;
-      left: 50%;
-      margin-left: -5px;
-      border: 5px solid transparent;
-    }
-    .blue-editor-inline-menu::after,
-    .blue-editor-block-menu::after {
-      content: "";
-      height: 0; width: 0;
-      position: absolute;
-      left: 50%;
-      margin-left: -5px;
-      border: 5px solid transparent;
-    }
-
-    .blue-editor-inline-menu.arrow-down::before,
-    .blue-editor-block-menu.arrow-down::before {
-      border-top-color: silver;
-      border-bottom-width: 0;
-      bottom: -6px;
-    }
-    .blue-editor-inline-menu.arrow-down::after,
-    .blue-editor-block-menu.arrow-down::after {
-      border-top-color: white;
-      border-bottom-width: 0;
-      bottom: -4.5px;
-    }
-    .blue-editor-inline-menu.arrow-up::before,
-    .blue-editor-block-menu.arrow-up::before {
-      border-bottom-color: silver;
-      border-top-width: 0;
-      bottom: 25px;
-    }
-    .blue-editor-inline-menu.arrow-up::after,
-    .blue-editor-block-menu.arrow-up::after {
-      border-bottom-color: white;
-      border-top-width: 0;
-      bottom: 24.5px;
-    }
-    .blue-editor-icon {
-      display: inline-block;
-      line-height: .8;
-      padding: 2px 8px;
-      cursor: pointer;
-    }
-    .menubar {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-      line-height: 0.1;
-    }
-    .menuicon {
-      display: inline-block;
-      border-right: 1px solid rgba(0, 0, 0, 0.2);
-      color: #888;
-      line-height: 1;
-      padding: 0 7px;
-      margin: 1px;
-      cursor: pointer;
-      text-align: center;
-      min-width: 1.4em;
-    }
-    .strong, .heading { font-weight: bold; }
-    .em { font-style: italic; }
-  
-    #editor { 
-      padding-top: 0;
-      position: relative;
-    }
-
-    #editor hr {
-      margin-top: 52px;
-      margin-bottom: 42px;
-      display: block;
-      border: 0;
-      text-align: center;
-      overflow: visible;
-      height: 0;
-    }
-    #editor hr::before {
-      --x-height-multiplier: 0.342;
-      --baseline-multiplier: 0.22;
-      font-family: medium-content-slab-serif-font,Georgia,Cambria,"Times New Roman",Times,serif;
-      font-weight: 400;
-      font-style: italic;
-      font-size: 30px;
-      letter-spacing: .6em;
-      content: '...';
-      display: inline-block;
-      margin-left: .6em;
-      color: rgba(0,0,0,.68);
-      position: relative;
-      top: -30px;
-    }
-
-    #editor pre {
-      padding: 20px;
-      background-color: #CCFF90;
-    }
-
-    #editor span.dropcap {
-      float: left;
-      font-size: 56px;
-      line-height: 27px;
-      padding-top: 3px;
-      padding-right: 5px;
-      padding-left: 3px;
-    }
-  </style>
-
-  <div style="margin-left: 200px; margin-right: 200px" id=editor></div>
-
-  <div style="display: none" id=content>
-    <h1>Hello ProseMirror</h1>
-    <h2>This is heading level 2</h2>
+  <div id="editor" style="margin-bottom: 23px"></div>
+  <div style="display: none" id="content">
+    <h3>Hello ProseMirror</h3>
 
     <p>This is editable text. You can focus it and start typing.</p>
 
@@ -155,7 +18,7 @@
       its styling from the menu. The basic schema
       supports <em>emphasis</em>, <strong>strong
         text</strong>, <a href="http://marijnhaverbeke.nl/blog">links</a>, <code>code
-      font</code>, and <img src="/img/smiley.png"> images.</p>
+          font</code>, and <img src="/img/smiley.png"> images.</p>
 
     <p>Block-level structure can be manipulated with key bindings (try
       ctrl-shift-2 to create a level 2 heading, or enter in an empty
@@ -164,20 +27,7 @@
     <p>Try using the “list” item in the menu to wrap this paragraph in
       a numbered list.</p>
   </div>
-
-  <!-- <script src="https://prosemirror.net/examples/prosemirror.js" type="text/javascript"></script>
-    <script src="require-pm.js"></script> -->
-  <script src="https://unpkg.com/prosemirror-dev-tools@1.4.0/dist/umd/prosemirror-dev-tools.min.js"></script>
   <script src="dist/index.js" type="text/javascript"></script>
-  <script type="text/javascript">
-    const { state, view } = BlueEditor({
-      editorElement: document.querySelector("#editor"),
-      content: '{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Hello ProseMirror"}]},{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"This is heading level 2"}]},{"type":"horizontal_rule"},{"type":"paragraph","content":[{"type":"text","marks":[{"type":"dropcap","attrs":{"contenteditable":false}}],"text":"T"},{"type":"text","text":"his is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing.vThis is editable text. You can focus it and start typing. This is editable text. You can focus it and start typing."}]},{"type":"paragraph","content":[{"type":"text","text":"To apply styling, you can select a piece of text and manipulate its styling from the menu. The basic schema supports "},{"type":"text","marks":[{"type":"em"}],"text":"emphasis"},{"type":"text","text":", "},{"type":"text","marks":[{"type":"strong"}],"text":"strong text"},{"type":"text","text":", "},{"type":"text","marks":[{"type":"link","attrs":{"href":"http://marijnhaverbeke.nl/blog","title":null,"contenteditable":false}}],"text":"links"},{"type":"text","text":", "},{"type":"text","marks":[{"type":"code"}],"text":"code font"},{"type":"text","text":", and "},{"type":"image","attrs":{"src":"/img/smiley.png","alt":null,"title":null}},{"type":"text","text":" images."}]},{"type":"paragraph","content":[{"type":"text","text":"Block-level structure can be manipulated with key bindings (try ctrl-shift-2 to create a level 2 heading, or enter in an empty textblock to exit the parent block), or through the menu."}]},{"type":"paragraph","content":[{"type":"text","text":"Try using the “list” item in the menu to wrap this paragraph in a numbered list."}]},{"type":"code_block","content":[{"type":"text","text":"It OK"}]}]}'
-    });
-
-    // Apply ProseMirror dev-tools
-    ProseMirrorDevTools.applyDevTools(view, { EditorState: state });
-  </script>
 </body>
 
 </html>
