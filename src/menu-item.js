@@ -1,5 +1,5 @@
 import { toggleMark, setBlockType, wrapIn } from "prosemirror-commands";
-import { canInsert, markActive, selectHeading, enableHeading } from './menu-item-utils';
+import { canInsert, markActive, enableHeading, isHeadingLevel } from './menu-item-utils';
 import { MenuItem, icons } from 'prosemirror-menu';
 import { NodeType, MarkType } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
@@ -84,7 +84,7 @@ export function makeDropcap(markType, options) {
         dropcapWord = dropcapWord.length <= 2 ? dropcapWord : dropcapWord.substr(0, 1);
         const from = $from.pos - $from.parentOffset;
         if (dispatch) {
-            if(isActiveDropcap(state)) {
+            if (isActiveDropcap(state)) {
                 dispatch(state.tr.removeMark(from, from + dropcapWord.length, markType.create()).scrollIntoView());
             }
             else {
@@ -119,18 +119,13 @@ export function makeDropcap(markType, options) {
  * @param {*} options
  */
 export function makeHeading(level, options) {
-    const isHeading = state => {
-        const selectedNode = state.selection.$from.parent;
-        return selectedNode && selectedNode.type.name == "heading" && selectedNode.attrs.level == level;
-    }
     return new MenuItem({
         ...options,
-        class: "blue-editor-icon",
-        active: isHeading,
-        select: state => selectHeading(state, level),
+        class: "prose-editor-icon",
+        active: state => isHeadingLevel(state, level),
         enable: state => enableHeading(state, level),
         run(state, dispatch) {
-            if (isHeading(state)) {
+            if (isHeadingLevel(state, level)) {
                 return setBlockType(state.schema.nodes.paragraph)(state, dispatch);
             }
             return setBlockType(state.schema.nodes.heading, { level })(state, dispatch);

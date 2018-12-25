@@ -34,8 +34,8 @@ export function markActive(state, type) {
  * @param {EditorState} state 
  * @param {number} level
  */
-export function selectHeading (state, level) {
-    const selectedNode  = state.selection.$from.parent;
+export function selectHeading(state, level) {
+    const selectedNode = state.selection.$from.parent;
     // Get first node and second node of document
     let firstNode, secondNode;
     try {
@@ -51,20 +51,20 @@ export function selectHeading (state, level) {
     }
 
     // At first node, hide h3, h4
-    if(selectedNode && selectedNode.eq(firstNode)) {
-        if([3, 4].includes(level)) {
+    if (selectedNode && selectedNode.eq(firstNode)) {
+        if ([3, 4].includes(level)) {
             return false;
         }
     }
     // At second node, hide h1, h4
-    else if(selectedNode && selectedNode.eq(secondNode)) {
-        if([1, 4].includes(level)) {
+    else if (selectedNode && selectedNode.eq(secondNode)) {
+        if ([1, 4].includes(level)) {
             return false;
         }
     }
     // Rest, hide h1, h2
     else {
-        if([1, 2].includes(level)) {
+        if ([1, 2].includes(level)) {
             return false;
         }
     }
@@ -77,9 +77,37 @@ export function selectHeading (state, level) {
  * @param {number} level 
  */
 export function enableHeading(state, level) {
-    const selectedNode  = state.selection.$from.parent;
-    if(selectedNode && selectedNode.type.name != "heading") {
+    const selectedNode = state.selection.$from.parent;
+    if (selectedNode && selectedNode.type.name != "heading") {
         return setBlockType(state.schema.nodes.heading, { level })(state);
     }
     return true;
+}
+
+/**
+ * @param {EditorState} state 
+ */
+export function isHeadingLevel(state, level) {
+    const selectedNode = state.selection.$from.parent;
+    let firstNode, secondNode;
+    try {
+        firstNode = state.doc.child(0);
+    } catch (error) {
+        // console.log("Cannot get first node");
+    }
+
+    try {
+        secondNode = state.doc.child(1);
+    } catch (error) {
+        // console.log("Cannot get second node")
+    }
+
+    if(selectedNode && selectedNode.type.name == "heading") {
+        if(selectedNode.attrs.level == level || 
+            selectedNode.attrs.level == 1 && level == 3 && selectedNode.eq(firstNode) ||
+            selectedNode.attrs.level == 2 && level == 4 && selectedNode.eq(secondNode)) {
+            return true;
+        }
+    }
+    return false;
 }

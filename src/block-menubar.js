@@ -125,7 +125,7 @@ class MenuBar {
 
     _createTooltip = () => {
         const tooltip = document.createElement('div');
-        tooltip.className = "blue-editor-menu blue-editor-block-menu arrow-down";
+        tooltip.className = "prose-editor-menu prose-editor-block-menu arrow-down";
         return tooltip;
     }
 

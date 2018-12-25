@@ -9,9 +9,9 @@ import { uglify } from 'rollup-plugin-uglify';
 export default {
     input: "./src/index.js",
     output: {
-        file: "dist/index.js",
+        file: "dist/prose-editor.js",
         format: "umd",
-        name: "BlueEditor",
+        name: "ProseEditor",
         // sourcemap: true,
     },
     plugins: [
@@ -20,7 +20,7 @@ export default {
         }),
         resolve(),
         commonjs(),
-        uglify(),
+        process.env.NODE_ENV == 'production' && uglify(),
         buble()
     ],
     // external(id) { return !/^[\.\/]/.test(id) }

@@ -40,7 +40,7 @@ class MenuBarView {
         let prev;
 
         this.tooltip = document.createElement('div');
-        this.tooltip.className = "blue-editor-menu blue-editor-inline-menu arrow-down";
+        this.tooltip.className = "prose-editor-menu prose-editor-inline-menu arrow-down";
 
         let { dom, update } = renderGrouped(view, options.content);
         this.contentUpdate = update;

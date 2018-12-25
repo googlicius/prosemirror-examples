@@ -141,14 +141,14 @@ export default function buildMenuItems(schema) {
     }
 
     if (type = schema.nodes.heading) {
-        r.makeHead1 = fromMenuItem.makeHeading(1, {
-            title: "Tiêu đề",
-            icon: customIcons.biggerHeading
-        });
-        r.makeHead2 = fromMenuItem.makeHeading(2, {
-            title: "Tiêu đề phụ",
-            icon: customIcons.smallerHeading
-        });
+        // r.makeHead1 = fromMenuItem.makeHeading(1, {
+        //     title: "Tiêu đề",
+        //     icon: customIcons.biggerHeading
+        // });
+        // r.makeHead2 = fromMenuItem.makeHeading(2, {
+        //     title: "Tiêu đề phụ",
+        //     icon: customIcons.smallerHeading
+        // });
         r.makeHead3 = fromMenuItem.makeHeading(3, {
             title: "Đầu mục lớn",
             icon: customIcons.biggerHeading

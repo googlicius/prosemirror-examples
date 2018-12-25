@@ -14,7 +14,7 @@ import blockMenuBar from './block-menubar';
 
 // Mix the nodes from prosemirror-schema-list into the basic schema to
 // create a schema with list support.
-const blueSchema = new Schema({
+const proseSchema = new Schema({
     nodes: addListNodes(schema.spec.nodes, "paragraph block*", "block"),
     marks: schema.spec.marks
 })
@@ -27,12 +27,12 @@ const blueSchema = new Schema({
 
 /**
  * A convenience plugin that bundles together
- * key bindings, input rules, and styling for the Blue-Editor.
+ * key bindings, input rules, and styling for the Prose-Editor.
  * 
  * @param {Options} options
  * @returns {Array<Plugin>}
  */
-function BlueEditorPlugins(options) {
+function ProseEditorPlugins(options) {
     const menuItems = buildMenuItems(options.schema);
     let plugins = [
         buildInputRules(options.schema),
@@ -48,36 +48,40 @@ function BlueEditorPlugins(options) {
 
     return plugins.concat(new Plugin({
         props: {
-            attributes: { class: 'blue-editor-style' }
+            attributes: { class: 'prose-editor-style' }
         }
     }));
 }
 
 /**
- * @typedef BlueEditorSpec
+ * @typedef ProseEditorSpec
  * @property {HTMLElement} editorElement
  * @property {*} content
+ * @property {boolean} editable
  */
 
- /**
-  * The Blue Editor
-  * @param {BlueEditorSpec} options 
-  */
- export default function BlueEditor(options) {
+/**
+ * The Prose Editor
+ * @param {ProseEditorSpec} options 
+ */
+export default function ProseEditor(options) 
+{
+    const isEditable = () => typeof options.editable != 'undefined' ? options.editable : true;
+
     let doc;
-    if(typeof options.content == "string") {
-        doc = Node.fromJSON(blueSchema, JSON.parse(options.content));
+    if (typeof options.content == "string") {
+        doc = Node.fromJSON(proseSchema, JSON.parse(options.content));
     }
     else {
-        doc = DOMParser.fromSchema(blueSchema).parse(options.content);
+        doc = DOMParser.fromSchema(proseSchema).parse(options.content);
     }
 
     const state = EditorState.create({
         doc,
-        plugins: BlueEditorPlugins({ schema: blueSchema, keyMaps: null }),
+        plugins: isEditable() ? ProseEditorPlugins({ schema: proseSchema, keyMaps: null }) : [],
     });
-    
-    let view = new EditorView(options.editorElement, { state })
-        
+
+    let view = new EditorView(options.editorElement, { state, editable: isEditable });
+
     return { state, view };
 }
