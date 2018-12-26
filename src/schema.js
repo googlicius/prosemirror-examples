@@ -1,4 +1,24 @@
-import { Schema } from "prosemirror-model"
+import { Schema } from "prosemirror-model";
+
+/**
+ * Make ID
+ * @param {number} length 
+ * @param {Array<string>} excepts 
+ */
+const makeid = (length, excepts = []) => {
+    length = length || 5;
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    for (var i = 0; i < length; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    if (excepts.includes(text)) {
+        return makeid(length, excepts);
+    }
+
+    return text;
+}
 
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -13,8 +33,15 @@ export const nodes = {
     paragraph: {
         content: "inline*",
         group: "block",
-        parseDOM: [{ tag: "p" }],
-        toDOM() { return ["p", 0] }
+        attrs: {
+            name: { default: null }
+        },
+        parseDOM: [{
+            tag: "p", getAttrs(dom) {
+                return { name: dom.getAttribute("name") }
+            }
+        }],
+        toDOM() { return ["p", { name: makeid() }, 0] }
     },
 
     // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
