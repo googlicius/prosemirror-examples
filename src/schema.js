@@ -1,24 +1,5 @@
-import { Schema } from "prosemirror-model";
-
-/**
- * Make ID
- * @param {number} length 
- * @param {Array<string>} excepts 
- */
-const makeid = (length, excepts = []) => {
-    length = length || 5;
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    for (var i = 0; i < length; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    if (excepts.includes(text)) {
-        return makeid(length, excepts);
-    }
-
-    return text;
-}
+import { Schema, Node } from "prosemirror-model";
+import { makeid } from './pure-func';
 
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -36,12 +17,15 @@ export const nodes = {
         attrs: {
             name: { default: null }
         },
-        parseDOM: [{
-            tag: "p", getAttrs(dom) {
-                return { name: dom.getAttribute("name") }
-            }
-        }],
-        toDOM() { return ["p", { name: makeid() }, 0] }
+        parseDOM: [{ tag: "p" }],
+        /**
+         * @param {Node} node 
+         */
+        toDOM(node) {
+            let paragraph_name = makeid();
+            node.attrs.name = paragraph_name;
+            return ["p", { name: paragraph_name }, 0]
+        }
     },
 
     // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
@@ -50,7 +34,7 @@ export const nodes = {
         group: "block",
         defining: true,
         parseDOM: [{ tag: "blockquote" }],
-        toDOM() { return ["blockquote", 0] }
+        toDOM() { return ["blockquote", { name: makeid() }, 0] }
     },
 
     // :: NodeSpec A horizontal rule (`<hr>`).
@@ -65,7 +49,10 @@ export const nodes = {
     // should hold the number 1 to 6. Parsed and serialized as `<h1>` to
     // `<h6>` elements.
     heading: {
-        attrs: { level: { default: 1 } },
+        attrs: { 
+            level: { default: 1 },
+            name: { default: null },
+        },
         content: "inline*",
         group: "block",
         defining: true,
@@ -77,7 +64,9 @@ export const nodes = {
             { tag: "h5", attrs: { level: 5 } },
             { tag: "h6", attrs: { level: 6 } }
         ],
-        toDOM(node) { return ["h" + node.attrs.level, 0] }
+        toDOM(node) {
+            return ["h" + node.attrs.level, { name: makeid() }, 0];
+        }
     },
 
     // :: NodeSpec A code listing. Disallows marks or non-text inline
@@ -184,11 +173,7 @@ export const marks = {
         attrs: {
             contenteditable: { default: false }
         },
-        parseDOM: [{
-            tag: "span.dropcap", getAttrs(dom) {
-                return { contenteditable: dom.getAttribute("contenteditable") }
-            }
-        }],
+        parseDOM: [{ tag: "span.dropcap" }],
         toDOM: () => ["span", { class: "dropcap", contenteditable: false }]
     }
 }

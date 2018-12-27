@@ -6,18 +6,39 @@ import { baseKeymap } from 'prosemirror-commands';
 import { addListNodes } from "prosemirror-schema-list";
 import { history } from 'prosemirror-history';
 import { schema } from './schema';
-import buildInputRules from './inputrules';
 import buildKeyMap from './keymap';
 import buildMenuItems from './menu';
-import inlineMenuBar from './inline-menubar';
-import blockMenuBar from './block-menubar';
+import buildInputRules from './plugins/inputrules';
+import inlineMenuBar from './plugins/inline-menubar';
+import blockMenuBar from './plugins/block-menubar';
+import synsNameAttribute from './plugins/sync-name-attribute';
+// import { makeid } from './pure-func';
 
 // Mix the nodes from prosemirror-schema-list into the basic schema to
 // create a schema with list support.
 const proseSchema = new Schema({
     nodes: addListNodes(schema.spec.nodes, "paragraph block*", "block"),
     marks: schema.spec.marks
-})
+});
+
+/**
+ * @override `createParagraphNear` in 'prosemirror-commands'
+ * @param {EditorState} state 
+ * @param {*} dispatch 
+ */
+// function createParagraphNear(state, dispatch) {
+//     let { $from, $to } = state.selection
+//     if ($from.parent.inlineContent || $to.parent.inlineContent) return false
+//     let type = $from.parent.contentMatchAt($to.indexAfter()).defaultType
+//     if (!type || !type.isTextblock) return false
+//     if (dispatch) {
+//         let side = (!$from.parentOffset && $to.index() < $to.parent.childCount ? $from : $to).pos
+//         let tr = state.tr.insert(side, type.createAndFill({ name: makeid() }))
+//         tr.setSelection(TextSelection.create(tr.doc, side + 1))
+//         dispatch(tr.scrollIntoView())
+//     }
+//     return true
+// }
 
 /**
  * @typedef Options
@@ -43,6 +64,7 @@ function ProseEditorPlugins(options) {
             blockFormatMenu: menuItems.blockFormatMenu,
             blockInsertMenu: menuItems.blockInsertMenu
         }),
+        synsNameAttribute(),
         history()
     ]
 
@@ -64,9 +86,8 @@ function ProseEditorPlugins(options) {
  * The Prose Editor
  * @param {ProseEditorSpec} options 
  */
-export default function ProseEditor(options) 
-{
-    const isEditable = () => typeof options.editable != 'undefined' ? options.editable : true;
+export default function ProseEditor(options) {
+    const editable = () => typeof options.editable != 'undefined' ? options.editable : true;
 
     let doc;
     if (typeof options.content == "string") {
@@ -78,10 +99,10 @@ export default function ProseEditor(options)
 
     const state = EditorState.create({
         doc,
-        plugins: isEditable() ? ProseEditorPlugins({ schema: proseSchema, keyMaps: null }) : [],
+        plugins: editable() ? ProseEditorPlugins({ schema: proseSchema, keyMaps: null }) : [],
     });
 
-    let view = new EditorView(options.editorElement, { state, editable: isEditable });
+    let view = new EditorView(options.editorElement, { state, editable });
 
     return { state, view };
 }
