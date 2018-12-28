@@ -22,9 +22,7 @@ export const nodes = {
          * @param {Node} node 
          */
         toDOM(node) {
-            let paragraph_name = makeid();
-            node.attrs.name = paragraph_name;
-            return ["p", { name: paragraph_name }, 0]
+            return ["p", 0]
         }
     },
 
@@ -65,7 +63,7 @@ export const nodes = {
             { tag: "h6", attrs: { level: 6 } }
         ],
         toDOM(node) {
-            return ["h" + node.attrs.level, { name: makeid() }, 0];
+            return ["h" + node.attrs.level, 0];
         }
     },
 
