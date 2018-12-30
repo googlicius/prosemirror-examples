@@ -739,9 +739,9 @@ cross-spawn@^6.0.5:
     which "^1.2.9"
 
 debug@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-4.1.0.tgz#373687bffa678b38b1cd91f861b63850035ddc87"
-  integrity sha512-heNPJUJIqC+xB6ayLAMHaIrmN9HKa7aQO8MGqKpvCA+uJYVcvR6l5kgdrhRuwPFHU7P5/A1w0BjByPHwpfTDKg==
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.1.1.tgz#3b72260255109c6b589cee050f1d516139664791"
+  integrity sha512-pYAIzeRo8J6KPEaJ0VWOh5Pzkbw/RetuzehGM7QRRX5he4fPHx2rdKMB256ehJCkX+XRQm16eZLqLNS8RSZXZw==
   dependencies:
     ms "^2.1.1"
 
@@ -1412,9 +1412,9 @@ semver@^5.3.0, semver@^5.4.1, semver@^5.5.0:
   integrity sha512-RS9R6R35NYgQn++fkDWaOmqGoj4Ek9gGs+DPxNUZKuwE183xjJroKvyo1IzVFeXvUrvmALy6FWD5xrdJT25gMg==
 
 serialize-javascript@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-1.5.0.tgz#1aa336162c88a890ddad5384baebc93a655161fe"
-  integrity sha512-Ga8c8NjAAp46Br4+0oZ2WxJCwIzwP60Gq1YPgU+39PiTVxyed/iKE/zyZI6+UlVYH5Q4PaQdHhcegIFPZTUfoQ==
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-1.6.0.tgz#b30ce5ddd6517f2c445e129ff5834a399fb5861e"
+  integrity sha512-AQxrNqu4EXWt03dJdgKXI+Au9+pvEuM5+Nk5g6+TmuxMCkEL03VhZ31HM+VKeaaZbFpDHaoSruiHq4PW9AIrOQ==
 
 shebang-command@^1.2.0:
   version "1.2.0"

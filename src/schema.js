@@ -1,5 +1,4 @@
 import { Schema, Node } from "prosemirror-model";
-import { makeid } from './pure-func';
 
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -22,7 +21,7 @@ export const nodes = {
          * @param {Node} node 
          */
         toDOM(node) {
-            return ["p", 0]
+            return ["p", { name: node.attrs.name }, 0]
         }
     },
 
@@ -32,7 +31,7 @@ export const nodes = {
         group: "block",
         defining: true,
         parseDOM: [{ tag: "blockquote" }],
-        toDOM() { return ["blockquote", { name: makeid() }, 0] }
+        toDOM() { return ["blockquote", 0] }
     },
 
     // :: NodeSpec A horizontal rule (`<hr>`).
@@ -63,7 +62,7 @@ export const nodes = {
             { tag: "h6", attrs: { level: 6 } }
         ],
         toDOM(node) {
-            return ["h" + node.attrs.level, 0];
+            return ["h" + node.attrs.level, { name: node.attrs.name }, 0];
         }
     },
 

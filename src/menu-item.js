@@ -4,6 +4,7 @@ import { MenuItem, icons } from 'prosemirror-menu';
 import { NodeType, MarkType } from 'prosemirror-model';
 import { EditorState } from 'prosemirror-state';
 import { wrapInList } from "prosemirror-schema-list";
+import { makeid } from "./pure-func";
 // import { canInsert } from 'prosemirror-utils';
 
 /**
@@ -125,10 +126,11 @@ export function makeHeading(level, options) {
         active: state => isHeadingLevel(state, level),
         enable: state => enableHeading(state, level),
         run(state, dispatch) {
+            const selectedNode = state.selection.$from.parent;
             if (isHeadingLevel(state, level)) {
-                return setBlockType(state.schema.nodes.paragraph)(state, dispatch);
+                return setBlockType(state.schema.nodes.paragraph, { name: selectedNode.attrs.name })(state, dispatch);
             }
-            return setBlockType(state.schema.nodes.heading, { level })(state, dispatch);
+            return setBlockType(state.schema.nodes.heading, { level, name: selectedNode.attrs.name })(state, dispatch);
         }
     });
 }
