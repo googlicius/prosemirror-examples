@@ -63,6 +63,12 @@ class MenuBar {
         view.dom.parentNode.appendChild(this.tooltip);
         ["blur", "focus"].forEach(event => view.dom.addEventListener(event, () => this.update(view, null)));
         this.update(view, null);
+        // Listen event from document, not from view.dom
+        document.addEventListener("keydown", event => {
+            if(event.key == "Escape") {
+                this._hideTooltip();
+            }
+        })
     }
 
     /**
@@ -75,11 +81,11 @@ class MenuBar {
         // Hide the button when the editor lost focus
         if (!view.hasFocus()) {
             this.blockMenu.style.display = "none";
-            this.tooltip.style.display = "none";
+            this._hideTooltip();
             return;
         }
         if (this.tooltip.style.display == "") {
-            this.tooltip.style.display = "none";
+            this._hideTooltip();
         }
         
         const { $from } = view.state.selection;
@@ -203,7 +209,7 @@ class MenuBar {
                 this._positionTooltip(view);
             }
             else {
-                this.tooltip.style.display = "none";
+                this._hideTooltip();
             }
         }
 
@@ -240,6 +246,10 @@ class MenuBar {
         }
 
         return { menuItem_Format, menuItem_Insert };
+    }
+
+    _hideTooltip = () => {
+        this.tooltip.style.display = "none";
     }
 
     /**

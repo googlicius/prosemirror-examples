@@ -4,7 +4,7 @@ import { makeid } from "./../pure-func";
 
 export default function syncNameAttribute() {
     return new Plugin({
-        view: editorView => {
+        view(editorView) {
             const state = editorView.state;
 
             /**
@@ -19,7 +19,7 @@ export default function syncNameAttribute() {
                                 tr = tr.setBlockType(
                                     offset + 1,
                                     offset + node.nodeSize,
-                                    state.schema.nodes.paragraph, 
+                                    state.schema.nodes.paragraph,
                                     { name: makeid() }
                                 );
                             }

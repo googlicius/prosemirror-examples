@@ -1,4 +1,4 @@
-import { Plugin, EditorState } from 'prosemirror-state';
+import { Plugin, EditorState, TextSelection } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { renderGrouped } from 'prosemirror-menu';
 
@@ -51,14 +51,25 @@ class MenuBarView {
             this.mousedown = true;
             prev = view.state;
         });
-        // Listen event from document, not from view.dow
+        // Listen event from document, not from view.dom
         document.addEventListener('mouseup', () => {
             this.mousedown = false;
             if(!view.state.selection.empty) {
-                this.update(view, prev);
-                prev = null;
+                if(window.getSelection().focusNode) {
+                    this.update(view, prev);
+                    prev = null;
+                }
+                else {
+                    // ProseMirror selection is not empty, but window selection is empty: Hide tooltip
+                    this._hideTooltip();
+                }
             }
         });
+        document.addEventListener('keydown', (event) => {
+            if(event.key == 'Escape') {
+                this._hideTooltip();
+            }
+        })
         this.update(view, null);
     }
 
@@ -72,7 +83,7 @@ class MenuBarView {
 
         // Hide the tooltip if the selection is empty
         if (state.selection.empty) {
-            this.tooltip.style.display = "none";
+            this._hideTooltip();
             return;
         }
 
@@ -129,5 +140,9 @@ class MenuBarView {
             this.tooltip.style.bottom = null;
             this.tooltip.style.top =  start.bottom - box.top + 'px';
         }
+    }
+
+    _hideTooltip = () => {
+        this.tooltip.style.display = "none";
     }
 }

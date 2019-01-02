@@ -192,7 +192,7 @@ export function wrapBlockquote(nodeType, options) {
      * @param {EditorState} state 
      */
     const isActive = state => {
-        const selectedNode = state.selection.$from.parent;
+        const selectedNode = state.selection.$from.node(1);
         const wrappedIn = wrapIn(nodeType, options.attrs instanceof Function ? null : options.attrs)(state);
         if (selectedNode && selectedNode.type.name == "blockquote" && !wrappedIn) {
             return true;
