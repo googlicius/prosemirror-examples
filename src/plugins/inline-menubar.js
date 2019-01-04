@@ -60,8 +60,9 @@ class MenuBarView {
                     prev = null;
                 }
                 else {
-                    // ProseMirror selection is not empty, but window selection is empty: Hide tooltip
-                    this._hideTooltip();
+                    // ProseMirror's selection is not empty, but window selection is empty: Clear Prosemirror's selection
+                    const emptySelection = TextSelection.create(view.state.doc, 0);
+                    view.dispatch(view.state.tr.setSelection(emptySelection));
                 }
             }
         });
