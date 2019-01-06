@@ -68,11 +68,7 @@ function ProseEditorPlugins(options) {
         history()
     ]
 
-    return plugins.concat(new Plugin({
-        props: {
-            attributes: { class: 'prose-editor-style' }
-        }
-    }));
+    return plugins;
 }
 
 /**
@@ -97,10 +93,19 @@ export default function ProseEditor(options) {
         doc = DOMParser.fromSchema(proseSchema).parse(options.content);
     }
 
-    const state = EditorState.create({
-        doc,
-        plugins: editable() ? ProseEditorPlugins({ schema: proseSchema, keyMaps: null }) : [],
-    });
+    let plugins = [
+        new Plugin({
+            props: {
+                attributes: { class: 'article_content' }
+            }
+        })
+    ];
+
+    if(editable()) {
+        plugins = plugins.concat(ProseEditorPlugins({ schema: proseSchema, keyMaps: null }));
+    }
+
+    const state = EditorState.create({ doc, plugins });
 
     let view = new EditorView(options.editorElement, { state, editable });
 
